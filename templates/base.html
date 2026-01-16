@@ -25,17 +25,22 @@
         }
         
         .navbar {
-            background: rgba(10, 10, 10, 0.95);
+            background: rgba(10, 10, 10, 0.65);
             padding: 0.8rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            position: sticky;
+
+            position: fixed;   /* FLOATING */
             top: 0;
+            left: 0;
+            width: 100%;
+
             z-index: 1000;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
         }
+
         
         .navbar-left {
             display: flex;

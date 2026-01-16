@@ -8,7 +8,7 @@
 <style>
     .hero-section {
         position: relative;
-        height: 90vh;
+        height: 97vh;
         margin: 0 0 3rem 0;
         overflow: hidden;
     }
@@ -315,7 +315,7 @@
         <div class="hero-slider">
             {% for anime in spotlight.results %}
             <div class="hero-slide {% if loop.index == 1 %}active{% endif %}" data-index="{{ loop.index0 }}">
-                <img src="{{ anime.banner or anime.image }}" alt="{{ anime.title }}" class="hero-background">
+                <img src="{{ anime.banner }}" alt="{{ anime.title }}" class="hero-background">
                 <div class="hero-gradient"></div>
                 <div class="hero-content">
                     <div class="hero-badge">
@@ -424,7 +424,7 @@
                 <h3>Upcoming</h3>
                 <div class="release-list">
                     {% if upcoming and upcoming.results %}
-                        {% for anime in upcoming.results %}
+                        {% for anime in upcoming.results[0:8] %}
                         <a href="/anime/{{ anime.id }}" class="release-item">
                             <img src="{{ anime.image }}" alt="{{ anime.title }}">
                             <div class="release-info">
