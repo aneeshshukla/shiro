@@ -1,8 +1,10 @@
 from flask import Flask, render_template, request, jsonify
 import requests
-from functools import lru_cache
+# from functools import lru_cache
 import os
 from dotenv import load_dotenv
+from cachetools import TTLCache, cached
+cache = TTLCache(maxsize=100, ttl=180)
 
 load_dotenv() 
 
@@ -13,12 +15,13 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 BASE_URL = os.getenv('BASE_URL')
 
 # Cache API responses for better performance
-@lru_cache(maxsize=100)
+@cached(cache)
 def fetch_api(endpoint, params=None):
-    """Fetch data from API with caching"""
+    """Fetch data from API with 5-minute caching"""
     try:
         url = f"{BASE_URL}/{endpoint}"
-        print(url)
+        print("Fetching:", url)
+
         response = requests.get(url, params=params, timeout=10)
         response.raise_for_status()
         return response.json()

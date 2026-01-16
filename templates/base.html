@@ -272,8 +272,11 @@
             .nav-links {
                 overflow-x: auto;
                 width: 100%;
+                display: none;
             }
-            
+            .search-container{
+                display: none;
+            }
             .anime-grid {
                 grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
                 gap: 1rem;
@@ -283,7 +286,7 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <nav class="navbar">
+    <nav class="navbar" id="navbar">
         <div class="navbar-left">
             <a href="/" class="logo">
                 <span>SHI</span><span class="logo-icon">RO</span>
@@ -303,9 +306,20 @@
             </form>
         </div>
     </nav>
+    <div style="height: auto; width: 100%;" id="spacer"></div>
+    </div>
     
     {% block content %}{% endblock %}
     
     {% block extra_js %}{% endblock %}
+    
 </body>
+<script>
+        const otherElement = document.getElementById('navbar');
+        const totalContentHeight = otherElement.scrollHeight.toString();
+        console.log(totalContentHeight)
+        const spacer = document.getElementById('spacer');
+        spacer.style.height = totalContentHeight + "px";
+
+    </script>
 </html>
