@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}{{ category|title }} - AnimeStream{% endblock %}
+{%block extra_css%}
+<style>
+    .anime-grid{
+        padding: 5%;
+    }
+</style>
+{%endblock%}
+{% block content %}
+    <h2 class="section-title">{{ category|title|replace('-', ' ') }}</h2>
+    
+    {% if data and data.results %}
+        <div class="anime-grid">
+            {% for anime in data.results %}
+            <a href="/anime/{{ anime.id }}" style="text-decoration: none; color: inherit;">
+                <div class="anime-card">
+                    <img src="{{ anime.image }}" alt="{{ anime.title }}">
+                    <div class="anime-card-content">
+                        <h3>{{ anime.title }}</h3>
+                        <p class="meta">{{ anime.releaseDate or 'N/A' }} • {{ anime.subOrDub }}</p>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        
+        {% if data.hasNextPage or page > 1 %}
+        <div class="pagination">
+            {% if page > 1 %}
+            <a href="?page={{ page - 1 }}">← Previous</a>
+            {% endif %}
+            <span class="current">Page {{ page }}</span>
+            {% if data.hasNextPage %}
+            <a href="?page={{ page + 1 }}">Next →</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    {% else %}
+        <p style="text-align: center; margin-top: 3rem;">No anime found.</p>
+    {% endif %}
+{% endblock %}

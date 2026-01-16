@@ -1,0 +1,87 @@
+
+{% extends "base.html" %}
+
+{% block title %}Search - AnimeStream{% endblock %}
+
+{%block extra_css%}
+<style>
+    .anime-grid{
+        padding: 5%;
+    }
+</style>
+{%endblock%}
+
+{% block content %}
+    {% if query %}
+        <h2 class="section-title">Search Results for "{{ query }}"</h2>
+        
+        {% if results and results.results %}
+            <div class="anime-grid">
+                {% for anime in results.results %}
+                <a href="/anime/{{ anime.id }}" style="text-decoration: none; color: inherit;">
+                    <div class="anime-card">
+                        <img src="{{ anime.image }}" alt="{{ anime.title }}">
+                        <div class="anime-card-content">
+                            <h3>{{ anime.title }}</h3>
+                            <p class="meta">{{ anime.type }} • <span>CC {{ anime.sub }}</span> {% if anime.dub %}<span>🎤 {{ anime.dub }}</span>{% endif%}</p>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+            
+            {% if results.hasNextPage or page > 1 %}
+            <div class="pagination">
+                {% if page > 1 %}
+                <a href="?q={{ query }}&page={{ page - 1 }}">← Previous</a>
+                {% endif %}
+                <span class="current">Page {{ page }}</span>
+                {% if results.hasNextPage %}
+                <a href="?q={{ query }}&page={{ page + 1 }}">Next →</a>
+                {% endif %}
+            </div>
+            {% endif %}
+        {% else %}
+            <p style="text-align: center; margin-top: 3rem; font-size: 1.2rem;">
+                No results found for "{{ query }}"
+            </p>
+        {% endif %}
+    {% else %}
+    <!-- <h2 class="section-title">Search Results for "{{ query }}"</h2> -->
+        
+        {% if results and results.results %}
+            <div class="anime-grid">
+                {% for anime in results.results %}
+                <a href="/anime/{{ anime.id }}" style="text-decoration: none; color: inherit;">
+                    <div class="anime-card">
+                        <img src="{{ anime.image }}" alt="{{ anime.title }}">
+                        <div class="anime-card-content">
+                            <h3>{{ anime.title }}</h3>
+                            <p class="meta">{{ anime.type }} • <span>CC {{ anime.sub }}</span> {% if anime.dub %}<span>🎤 {{ anime.dub }}</span>{% endif%}</p>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+            
+            {% if results.hasNextPage or page > 1 %}
+            <div class="pagination">
+                {% if page > 1 %}
+                <a href="?q={{ query }}&page={{ page - 1 }}">← Previous</a>
+                {% endif %}
+                <span class="current">Page {{ page }}</span>
+                {% if results.hasNextPage %}
+                <a href="?q={{ query }}&page={{ page + 1 }}">Next →</a>
+                {% endif %}
+            </div>
+            {% endif %}
+        {% else %}
+            <p style="text-align: center; margin-top: 3rem; font-size: 1.2rem;">
+                No results found for "{{ query }}"
+            </p>
+        {% endif %}
+        <!-- <p style="text-align: center; margin-top: 3rem; font-size: 1.2rem;">
+            Enter a search term to find anime
+        </p> -->
+    {% endif %}
+{% endblock %}

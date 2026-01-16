@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Watch - AnimeStream{% endblock %}
+
+{% block extra_css %}
+<style>
+    .video-container {
+        background: #000;
+        border-radius: 12px;
+        overflow: hidden;
+        margin: 2rem 0;
+    }
+    
+    video {
+        width: 100%;
+        max-height: 70vh;
+    }
+    
+    .servers-list {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin: 1rem 0;
+    }
+    
+    .server-btn {
+        padding: 0.5rem 1rem;
+        background: rgba(102, 126, 234, 0.3);
+        border: 2px solid #667eea;
+        color: #fff;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .server-btn:hover {
+        background: #667eea;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    <h2 class="section-title">Now Watching</h2>
+    
+    {% if streams and streams.sources %}
+    <div class="video-container">
+        <video id="player" controls autoplay>
+            <source src="{{ streams.sources[0].url }}" type="application/x-mpegURL">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+    
+    {% if servers %}
+    <h3>Available Servers:</h3>
+    <div class="servers-list">
+        {% for server in servers %}
+        <button class="server-btn" onclick="changeServer('{{ server.url }}')">
+            {{ server.name }}
+        </button>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <div style="margin-top: 2rem;">
+        <a href="?dub={{ 'false' if is_dub else 'true' }}" 
+           style="padding: 0.5rem 1rem; background: #667eea; color: #fff; text-decoration: none; border-radius: 8px;">
+            Switch to {{ 'Sub' if is_dub else 'Dub' }}
+        </a>
+    </div>
+    {% else %}
+    <p>Unable to load video. Please try a different episode or server.</p>
+    {% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script>
+    const video = document.getElementById('player');
+    const videoSrc = '{{ streams.sources[0].url if streams and streams.sources else "" }}';
+    
+    if (Hls.isSupported() && videoSrc.includes('.m3u8')) {
+        const hls = new Hls();
+        hls.loadSource(videoSrc);
+        hls.attachMedia(video);
+    }
+    
+    function changeServer(url) {
+        alert('Server switching functionality - URL: ' + url);
+    }
+</script>
+{% endblock %}

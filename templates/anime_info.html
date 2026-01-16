@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}{{ anime.title }} - AnimeStream{% endblock %}
+
+{% block extra_css %}
+<style>
+    .anime-details {
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 12px;
+        padding: 2rem;
+        margin-top: 2rem;
+    }
+    
+    .anime-header {
+        display: flex;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .anime-poster {
+        width: 300px;
+        border-radius: 12px;
+    }
+    
+    .anime-info {
+        flex: 1;
+    }
+    
+    .episodes-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    
+    .episode-btn {
+        background: rgba(102, 126, 234, 0.3);
+        border: 2px solid #667eea;
+        color: #fff;
+        padding: 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        text-align: center;
+        text-decoration: none;
+        display: block;
+        transition: all 0.3s;
+    }
+    
+    .episode-btn:hover {
+        background: #667eea;
+        transform: scale(1.05);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="anime-details">
+        <div class="anime-header">
+            <img src="{{ anime.image }}" alt="{{ anime.title }}" class="anime-poster">
+            <div class="anime-info">
+                <h1>{{ anime.title }}</h1>
+                <h3>{{ anime.japaneseTitle }}</h3>
+                <p style="margin: 1rem 0;">{{ anime.description or 'No description available.' }}</p>
+                <p><strong>Release Date:</strong> {{ anime.releaseDate or 'N/A' }}</p>
+                <p><strong>Type:</strong> {{ anime.type }}</p>
+                <p><strong>Status:</strong> {{ anime.status }}</p>
+                <p><strong>Season:</strong> {{ anime.season }}</p>
+                <p><strong>Total Episodes:</strong> {{ anime.totalEpisodes }}</p>
+                <p><strong>Type:</strong> {{ anime.subOrDub }}</p>
+                <a href="{{ anime.url }}" class="episode-btn">
+                    <div>AniKai.to</div>
+                </a>
+
+            </div>
+        </div>
+        
+        {% if anime.episodes %}
+        <h2 class="section-title">Episodes</h2>
+        <div class="episodes-list">
+            {% for episode in anime.episodes %}
+            <a href="{{ episode.url }}" class="episode-btn">
+                <div>Episode {{ episode.number }}</div>
+                <small>{{ episode.title or '' }}</small>
+            </a>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+{% endblock %}
