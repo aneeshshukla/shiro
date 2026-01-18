@@ -1,9 +1,11 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, redirect
 import requests
 # from functools import lru_cache
 import os
 from dotenv import load_dotenv
 from cachetools import TTLCache, cached
+from cachetools.keys import hashkey
+
 cache = TTLCache(maxsize=100, ttl=180)
 
 load_dotenv() 
@@ -14,29 +16,32 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 # Base URL for Anime API
 BASE_URL = os.getenv('BASE_URL')
 
-# Cache API responses for better performance
-@cached(cache)
+def make_cache_key(endpoint, params=None):
+    if params is None:
+        return hashkey(endpoint)
+    return hashkey(endpoint, tuple(sorted(params.items())))
+
+@cached(cache, key=make_cache_key)
 def fetch_api(endpoint, params=None):
-    """Fetch data from API with 5-minute caching"""
     try:
         url = f"{BASE_URL}/{endpoint}"
-        print("Fetching:", url)
+        print("Fetching:", url, "Params:", params)
 
-        response = requests.get(url, params=params, timeout=10)
-        response.raise_for_status()
-        return response.json()
+        response = requests.get(url, params=params)
+        return response.json(),response.status_code
     except requests.exceptions.RequestException as e:
         print(f"API Error: {e}")
         return None
 
+
 # Home page
 @app.route('/')
 def index():
-    spotlight = fetch_api('spotlight')
-    recent_episodes = fetch_api('recent-episodes')
-    new_releases = fetch_api('new-releases')
-    upcoming = fetch_api('schedule/today')
-    latest_completed = fetch_api('latest-completed')
+    spotlight = fetch_api('spotlight')[0]
+    recent_episodes = fetch_api('recent-episodes')[0]
+    new_releases = fetch_api('new-releases')[0]
+    upcoming = fetch_api('top-upcoming')[0]
+    latest_completed = fetch_api('latest-completed')[0]
     return render_template('index.html', 
                          spotlight=spotlight,
                          recent_episodes=recent_episodes,
@@ -51,9 +56,9 @@ def search():
     page = request.args.get('page', 1, type=int)
     
     if not query:
-        return render_template('search.html',page=page,query='', results=fetch_api('recent-episodes'))
+        return render_template('search.html',page=page,query='', results=fetch_api('recent-episodes')[0])
     
-    results = fetch_api(query)
+    results = fetch_api(query)[0]
     return render_template('search.html', 
                          results=results, 
                          query=query,
@@ -66,17 +71,18 @@ def suggestions():
     if not query:
         return jsonify([])
     
-    data = fetch_api('suggestions', {'query': query})
+    data = fetch_api('search-suggestions', {'query': query})[0]
     return jsonify(data if data else [])
 
 # Anime details page
 @app.route('/anime/<anime_id>')
 def anime_info(anime_id):
-    info = fetch_api(f'info?id={anime_id}')
-    if not info:
+    info = fetch_api('info', {"id": anime_id})
+    print(info[1])
+    if not info or info[1]!=200:
         return render_template('error.html', 
                              message="Anime not found"), 404
-    return render_template('anime_info.html', anime=info)
+    return render_template('anime_info.html', anime=info[0])
 
 # Watch episode
 @app.route('/watch/<episode_id>')
@@ -84,10 +90,10 @@ def watch(episode_id):
     dub = request.args.get('dub', 'false').lower() == 'true'
     
     # Get streaming links
-    streams = fetch_api(f'watch/{episode_id}', {'dub': dub})
+    streams = fetch_api('watch', {'episode_id': episode_id,'dub': dub})[0]
     
     # Get available servers
-    servers = fetch_api(f'servers/{episode_id}', {'dub': dub})
+    servers = fetch_api('servers', {'episode_id': episode_id,'dub': dub})[0]
     
     if not streams:
         return render_template('error.html', 
@@ -112,7 +118,7 @@ def browse(category):
         return render_template('error.html', 
                              message="Invalid category"), 404
     
-    data = fetch_api(category)
+    data = fetch_api(category)[0]
     return render_template('browse.html', 
                          data=data,
                          category=category,
@@ -145,10 +151,16 @@ def browse(category):
 # API endpoint for dynamic loading
 @app.route('/api/anime/<anime_id>')
 def api_anime_info(anime_id):
-    info = fetch_api(f'info/{anime_id}')
+    info = fetch_api(f'info',{'id': anime_id})[0]
     return jsonify(info if info else {})
 
 # API endpoint for streaming links
+@app.route('/api/search-suggestions/<search>')
+def api_search_suggest(search):
+    # dub = request.args.get('dub', 'false').lower() == 'true'
+    streams = fetch_api(f'search-suggestions/{search}')[0]
+    return jsonify(streams if streams else {})
+
 @app.route('/api/watch/<episode_id>')
 def api_watch(episode_id):
     dub = request.args.get('dub', 'false').lower() == 'true'
