@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Watch {{ episode_title }} - ShiRo{% endblock %}
+{% block title %}Watch {{ anime_title }} - {{ subtitle }}{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -20,7 +20,7 @@
         overflow: hidden;
     }
     
-    /* Left Side - Video Player */
+    /* Left Side - Player Section */
     .player-section {
         background: #000;
         display: flex;
@@ -51,20 +51,11 @@
         gap: 0.5rem;
     }
     
-    .nav-link:hover {
-        color: #fff;
-    }
+    .nav-link:hover { color: #fff; }
+    .nav-separator { color: rgba(255, 255, 255, 0.3); }
+    .nav-link.active { color: #fff; font-weight: 600; }
     
-    .nav-separator {
-        color: rgba(255, 255, 255, 0.3);
-    }
-    
-    .nav-link.active {
-        color: #fff;
-        font-weight: 600;
-    }
-    
-    /* Video Player */
+    /* Iframe Wrapper */
     .video-wrapper {
         position: relative;
         background: #000;
@@ -76,10 +67,11 @@
         min-height: 0;
     }
     
-    #player {
+    #player-iframe {
         width: 100%;
         height: 100%;
-        object-fit: contain;
+        border: none;
+        background: #000;
     }
     
     .video-overlay {
@@ -88,49 +80,12 @@
         left: 50%;
         transform: translate(-50%, -50%);
         text-align: center;
-        pointer-events: none;
     }
     
     .video-title {
         font-size: 2rem;
-        font-weight: 300;
         color: rgba(255, 255, 255, 0.9);
         margin-bottom: 0.5rem;
-        text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.8);
-    }
-    
-    .video-subtitle {
-        font-size: 1.2rem;
-        color: rgba(255, 255, 255, 0.7);
-        font-weight: 300;
-        text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.8);
-    }
-    
-    .play-button {
-        width: 80px;
-        height: 80px;
-        background: #ff5722;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: all 0.3s;
-        pointer-events: all;
-        margin: 2rem auto 0;
-        box-shadow: 0 8px 30px rgba(255, 87, 34, 0.4);
-    }
-    
-    .play-button:hover {
-        transform: scale(1.1);
-        background: #ff6b3d;
-    }
-    
-    .play-button::before {
-        content: '▶';
-        color: white;
-        font-size: 2rem;
-        margin-left: 5px;
     }
     
     /* Control Bar */
@@ -140,7 +95,7 @@
         padding: 1rem 2rem;
         display: flex;
         align-items: center;
-        gap: 1.5rem;
+        gap: 1rem;
         border-top: 1px solid rgba(255, 255, 255, 0.1);
         flex-shrink: 0;
         flex-wrap: wrap;
@@ -160,14 +115,8 @@
         transition: all 0.3s;
     }
     
-    .control-btn:hover {
-        background: rgba(255, 255, 255, 0.1);
-        color: #fff;
-    }
-    
-    .control-btn.active {
-        color: #ff5722;
-    }
+    .control-btn:hover { background: rgba(255, 255, 255, 0.1); color: #fff; }
+    .control-btn.active { color: #ff5722; }
     
     /* Right Sidebar - Episodes */
     .episodes-sidebar {
@@ -178,90 +127,18 @@
         border-left: 1px solid rgba(255, 255, 255, 0.1);
     }
     
-    .sidebar-header {
-        padding: 1.5rem;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        flex-shrink: 0;
-    }
-    
-    .sidebar-title {
-        font-size: 1.2rem;
-        font-weight: 600;
-        color: #fff;
-        margin: 0 0 1rem 0;
-    }
-    
-    .sidebar-search {
-        position: relative;
-        margin-bottom: 1rem;
-    }
+    .sidebar-header { padding: 1.5rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1); flex-shrink: 0; }
+    .sidebar-title { font-size: 1.2rem; font-weight: 600; color: #fff; margin: 0 0 1rem 0; }
     
     .search-input {
         width: 100%;
-        padding: 0.7rem 2.5rem 0.7rem 1rem;
+        padding: 0.7rem 1rem;
         background: rgba(255, 255, 255, 0.05);
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 8px;
         color: #fff;
-        font-size: 0.9rem;
     }
-    
-    .search-input::placeholder {
-        color: rgba(255, 255, 255, 0.4);
-    }
-    
-    .search-icon {
-        position: absolute;
-        right: 1rem;
-        top: 50%;
-        transform: translateY(-50%);
-        color: rgba(255, 255, 255, 0.4);
-    }
-    
-    .sidebar-controls {
-        display: flex;
-        gap: 0.5rem;
-        align-items: center;
-    }
-    
-    .range-selector {
-        flex: 1;
-        padding: 0.5rem;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 6px;
-        color: #fff;
-        font-size: 0.85rem;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        cursor: pointer;
-    }
-    
-    .icon-btn {
-        width: 36px;
-        height: 36px;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 6px;
-        color: rgba(255, 255, 255, 0.7);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: all 0.3s;
-    }
-    
-    .icon-btn:hover {
-        background: rgba(255, 255, 255, 0.1);
-        color: #fff;
-    }
-    
-    .icon-btn.active {
-        color: #4ade80;
-        border-color: #4ade80;
-    }
-    
+
     /* Episodes List */
     .episodes-list {
         flex: 1;
@@ -275,51 +152,29 @@
         border-radius: 8px;
         padding: 1rem;
         margin-bottom: 0.75rem;
-        cursor: pointer;
-        transition: all 0.3s;
         text-decoration: none;
         color: inherit;
         display: block;
+        transition: 0.3s;
     }
     
-    .episode-item:hover {
-        background: rgba(255, 255, 255, 0.08);
-        border-color: rgba(255, 255, 255, 0.2);
-    }
-    
+    .episode-item:hover { background: rgba(255, 255, 255, 0.08); }
     .episode-item.active {
-        background: linear-gradient(135deg, rgba(255, 87, 34, 0.2) 0%, rgba(255, 107, 61, 0.2) 100%);
+        background: rgba(255, 87, 34, 0.1);
         border-color: #ff5722;
-    }
-    
-    .episode-number {
-        font-size: 0.95rem;
-        font-weight: 600;
-        color: #fff;
-        margin-bottom: 0.3rem;
-    }
-    
-    .episode-item.active .episode-number {
         color: #ff5722;
     }
     
-    /* Server Selection */
+    /* Servers Section */
     .servers-section {
         padding: 1.5rem 2rem;
         background: rgba(255, 255, 255, 0.02);
         border-top: 1px solid rgba(255, 255, 255, 0.1);
     }
     
-    .servers-title {
-        font-size: 0.9rem;
-        color: rgba(255, 255, 255, 0.6);
-        margin-bottom: 0.75rem;
-        font-weight: 600;
-    }
-    
     .servers-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
         gap: 0.5rem;
     }
     
@@ -328,171 +183,66 @@
         background: rgba(255, 255, 255, 0.05);
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 6px;
-        color: rgba(255, 255, 255, 0.8);
-        font-size: 0.85rem;
+        color: #fff;
         cursor: pointer;
-        transition: all 0.3s;
         text-align: center;
     }
     
-    .server-btn:hover {
-        background: rgba(255, 255, 255, 0.1);
-        border-color: rgba(255, 255, 255, 0.2);
-        color: #fff;
-    }
-    
-    .server-btn.active {
-        background: rgba(102, 126, 234, 0.2);
-        border-color: #667eea;
-        color: #667eea;
-    }
-    
-    /* Scrollbar */
-    .episodes-list::-webkit-scrollbar {
-        width: 8px;
-    }
-    
-    .episodes-list::-webkit-scrollbar-track {
-        background: rgba(255, 255, 255, 0.05);
-    }
-    
-    .episodes-list::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.2);
-        border-radius: 4px;
-    }
-    
-    .episodes-list::-webkit-scrollbar-thumb:hover {
-        background: rgba(255, 255, 255, 0.3);
-    }
-    
-    /* Responsive */
-    @media (max-width: 1200px) {
-        .watch-container {
-            grid-template-columns: 1fr 350px;
-        }
-    }
-    
+    .server-btn.active { color: #ff5722; border-color: #ff5722; background: rgba(255, 87, 34, 0.05); }
+
+    /* Mobile Handling */
     @media (max-width: 992px) {
-        .watch-container {
-            grid-template-columns: 1fr;
-            height: auto;
-        }
-        
-        .player-section {
-            height: auto;
-        }
-        
-        .video-wrapper {
-            min-height: 60vh;
-        }
-        
-        .episodes-sidebar {
-            height: auto;
-            max-height: 600px;
-        }
-    }
-    
-    @media (max-width: 768px) {
-        .player-nav {
-            padding: 0.75rem 1rem;
-            font-size: 0.85rem;
-        }
-        
-        .control-bar {
-            padding: 0.75rem 1rem;
-            gap: 0.75rem;
-        }
-        
-        .video-wrapper {
-            min-height: 50vh;
-        }
-        
-        .video-title {
-            font-size: 1.5rem;
-        }
-        
-        .video-subtitle {
-            font-size: 1rem;
-        }
-        
-        .play-button {
-            width: 60px;
-            height: 60px;
-        }
+        .watch-container { grid-template-columns: 1fr; height: auto; overflow: visible; }
+        .episodes-sidebar { height: auto; max-height: 500px; border-left: none; border-top: 1px solid #333; }
+        .video-wrapper { aspect-ratio: 16 / 9; flex: none; }
+        .player-section { height: auto; }
     }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="watch-container">
-    <!-- Left Side - Video Player -->
     <div class="player-section">
-        <!-- Navigation -->
         <nav class="player-nav">
-            <a href="/" class="nav-link">
-                <span>🏠</span> Home
-            </a>
+            <a href="/" class="nav-link">Home</a>
             <span class="nav-separator">/</span>
-            <a href="#" class="nav-link">MOVIE</a>
-            <span class="nav-separator">/</span>
-            <span class="nav-link active">{{ anime_title or 'Suzume' }}</span>
+            <span class="nav-link active">{{ anime_info.title }}</span>
         </nav>
         
-        <!-- Video Player -->
         <div class="video-wrapper">
             {% if streams and streams.sources %}
-            <video id="player" controls>
-                <source src="{{ streams.sources[0].url }}" type="application/x-mpegURL">
-                Your browser does not support the video tag.
-            </video>
+                <iframe 
+                    id="player-iframe" 
+                    src="{{ streams.sources[0].url }}" 
+                    allowfullscreen="true" 
+                    scrolling="no" 
+                    allow="autoplay; fullscreen"
+                    autoplay>
+                </iframe>
             {% else %}
-            <div class="video-overlay">
-                <h2 class="video-title">{{ anime_title }}</h2>
-                <p class="video-subtitle">{{ subtitle }}</p>
-                <div class="play-button" onclick="document.getElementById('player').play()"></div>
-            </div>
+                <div class="video-overlay">
+                    <h2 class="video-title">{{ anime_title }}</h2>
+                    <p class="video-subtitle">Video sources not found.</p>
+                </div>
             {% endif %}
         </div>
         
-        <!-- Control Bar -->
         <div class="control-bar">
-            <button class="control-btn">
-                <span>🌙</span> Focus
-            </button>
-            <button class="control-btn active">
-                <span>⏭</span> AutoNext
-            </button>
-            <button class="control-btn">
-                <span>▶</span> AutoPlay
-            </button>
-            <button class="control-btn">
-                <span>✂</span> AutoSkip
-            </button>
-            <button class="control-btn">
-                <span>⏮</span> Prev
-            </button>
-            <button class="control-btn">
-                <span>⏭</span> Next
-            </button>
-            <button class="control-btn">
-                <span>♥</span> Bookmark
-            </button>
-            <button class="control-btn">
-                <span>👥</span> W2G
-            </button>
-            <button class="control-btn">
-                <span>⚠</span> Report
-            </button>
+            <button class="control-btn"><span>🌙</span> Focus</button>
+            <button class="control-btn active"><span>⏭</span> AutoNext</button>
+            <button class="control-btn"><span>▶</span> AutoPlay</button>
+            <button class="control-btn"><span>⏮</span> Prev</button>
+            <button class="control-btn"><span>⏭</span> Next</button>
+            <button class="control-btn"><span>⚠</span> Report</button>
         </div>
         
-        <!-- Servers Section -->
         {% if servers %}
         <div class="servers-section">
-            <div class="servers-title">Available Servers:</div>
+            <div class="servers-title" style="color: #888; margin-bottom: 10px; font-size: 0.9rem;">Available Servers:</div>
             <div class="servers-grid">
                 {% for server in servers %}
                 <button class="server-btn {% if loop.index == 1 %}active{% endif %}" 
-                        onclick="changeServer('{{ server.url }}')">
+                        onclick="changeServer('{{ server.url }}', this)">
                     {{ server.name }}
                 </button>
                 {% endfor %}
@@ -501,46 +251,28 @@
         {% endif %}
     </div>
     
-    <!-- Right Sidebar - Episodes -->
     <aside class="episodes-sidebar">
         <div class="sidebar-header">
             <h3 class="sidebar-title">Episodes</h3>
-            
             <div class="sidebar-search">
-                <input type="text" class="search-input" placeholder="# Find">
-                <span class="search-icon">#</span>
-            </div>
-            
-            <div class="sidebar-controls">
-                <div class="range-selector">
-                    <span>001-001</span>
-                    <span>▼</span>
-                </div>
-                <button class="icon-btn active" title="CC">
-                    CC
-                </button>
-                <button class="icon-btn" title="Settings">
-                    🔧
-                </button>
-                <button class="icon-btn" title="List view">
-                    ≡
-                </button>
+                <input type="text" class="search-input" placeholder="# Find episode...">
             </div>
         </div>
         
         <div class="episodes-list">
-            {% if episodes %}
-                {% for episode in episodes %}
-                <a href="{{ episode.url }}" class="episode-item {% if episode.number == current_episode %}active{% endif %}">
+            {% if anime_info.episodes %}
+                {% for episode in anime_info.episodes %}
+                {% set id_parts = episode.id.split('$') %}
+                <a href="/watch/{{ id_parts[0] }}?{{ id_parts[1] }}" class="episode-item {% if episode.number|string == current_episode|string %}active{% endif %}">
                     <div class="episode-number">
-                        {{ episode.number }}. {{ episode.title or 'Episode ' + episode.number|string }}
+                        {{ episode.number }}. {{ episode.title or 'Episode ' ~ episode.number }}
                     </div>
                 </a>
                 {% endfor %}
             {% else %}
-                <a href="#" class="episode-item active">
+                <div class="episode-item active">
                     <div class="episode-number">1 Complete Movie</div>
-                </a>
+                </div>
             {% endif %}
         </div>
     </aside>
@@ -548,45 +280,40 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <script>
-    const video = document.getElementById('player');
-    const videoSrc = '{{ streams.sources[0].url if streams and streams.sources else "" }}';
-    
-    if (video && Hls.isSupported() && videoSrc.includes('.m3u8')) {
-        const hls = new Hls();
-        hls.loadSource(videoSrc);
-        hls.attachMedia(video);
-        
-        hls.on(Hls.Events.MANIFEST_PARSED, function() {
-            video.play();
-        });
-    } else if (video && videoSrc) {
-        video.src = videoSrc;
-        video.play();
-    }
-    
-    function changeServer(url) {
-        if (video && Hls.isSupported()) {
-            const hls = new Hls();
-            hls.loadSource(url);
-            hls.attachMedia(video);
-            video.play();
-        } else if (video) {
-            video.src = url;
-            video.play();
+    /**
+     * Changes the iframe source and manages active button state
+     */
+    function changeServer(url, btnElement) {
+        const iframe = document.getElementById('player-iframe');
+        if (iframe && url) {
+            iframe.src = url;
+            
+            // Manage button active states
+            document.querySelectorAll('.server-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            btnElement.classList.add('active');
         }
     }
     
-    // Control button interactions
+    // Toggle logic for control bar buttons
     document.querySelectorAll('.control-btn').forEach(btn => {
         btn.addEventListener('click', function() {
-            if (!this.classList.contains('active')) {
-                this.classList.add('active');
-            } else {
-                this.classList.remove('active');
-            }
+            this.classList.toggle('active');
         });
     });
+
+    // Simple episode search filter
+    const searchInput = document.querySelector('.search-input');
+    if (searchInput) {
+        searchInput.addEventListener('input', function(e) {
+            const term = e.target.value.toLowerCase();
+            document.querySelectorAll('.episode-item').forEach(item => {
+                const text = item.textContent.toLowerCase();
+                item.style.display = text.includes(term) ? 'block' : 'none';
+            });
+        });
+    }
 </script>
 {% endblock %}

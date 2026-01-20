@@ -30,7 +30,7 @@
                 {% endfor %}
             </div>
             
-            {% if results.hasNextPage or page > 1 %}
+            {% if results.hasNextPage or results.totalPages > 1 %}
             <div class="pagination">
                 {% if page > 1 %}
                 <a href="?q={{ query }}&page={{ page - 1 }}">← Previous</a>

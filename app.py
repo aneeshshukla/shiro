@@ -5,6 +5,7 @@ import os
 from dotenv import load_dotenv
 from cachetools import TTLCache, cached
 from cachetools.keys import hashkey
+import urllib.parse
 
 cache = TTLCache(maxsize=100, ttl=180)
 
@@ -15,6 +16,7 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
 # Base URL for Anime API
 BASE_URL = os.getenv('BASE_URL')
+STREAM_URL = os.getenv('STREAM_URL')
 
 def make_cache_key(endpoint, params=None):
     if params is None:
@@ -29,6 +31,19 @@ def fetch_api(endpoint, params=None):
 
         response = requests.get(url, params=params)
         return response.json(),response.status_code
+    except requests.exceptions.RequestException as e:
+        print(f"API Error: {e}")
+        return None
+    
+
+@cached(cache, key=make_cache_key)
+def fetch_stream_api(endpoint, params=None):
+    try:
+        url = f"{STREAM_URL}/{endpoint}"
+        print("Fetching:", url, "Params:", params)
+
+        response = requests.get(url, params=params)
+        return response.json()
     except requests.exceptions.RequestException as e:
         print(f"API Error: {e}")
         return None
@@ -56,7 +71,7 @@ def search():
     page = request.args.get('page', 1, type=int)
     
     if not query:
-        return render_template('search.html',page=page,query='', results=fetch_api('recent-episodes')[0])
+        return render_template('search.html',page=page,query='', results=fetch_api('specials', {"page": request.args.get('page', '1')})[0])
     
     results = fetch_api(query)[0]
     return render_template('search.html', 
@@ -87,23 +102,37 @@ def anime_info(anime_id):
 # Watch episode
 @app.route('/watch/<episode_id>')
 def watch(episode_id):
+    ep = request.args.get('ep', '1')
     dub = request.args.get('dub', 'false').lower() == 'true'
+    category = "dub" if dub else "sub"
     
-    # Get streaming links
-    streams = fetch_api('watch', {'episode_id': episode_id,'dub': dub})[0]
-    
-    # Get available servers
-    servers = fetch_api('servers', {'episode_id': episode_id,'dub': dub})[0]
-    
-    if not streams:
-        return render_template('error.html', 
-                             message="Episode not found"), 404
-    
-    return render_template('watch.html', 
-                         streams=streams,
-                         servers=servers,
-                         episode_id=episode_id,
-                         is_dub=dub)
+    try:
+        # Call FastAPI
+        # Note: We pass both 'ep' and 'category' to let the API do the filtering
+        params = {'ep': ep, 'category': category}
+        print(params)
+        response = fetch_stream_api(episode_id,params)
+        # response = requests.get(api_url, params=params)
+        api_response = response
+
+        if not api_response or not api_response.get("ok"):
+            return render_template('error.html', message="Streaming service unavailable"), 503
+
+        # We pass the api_response keys (streams, servers, anime_title) 
+        # directly into the template context using **
+        print(api_response["streams"]['sources'][0]["url"])
+        return render_template(
+            'watch.html',
+            **api_response, 
+            current_episode=ep,
+            is_dub=dub,
+            episode_id=episode_id,
+            anime_info = fetch_api('info', {"id": episode_id})[0]
+        )
+
+    except Exception as e:
+        print(f"Flask Error: {e}")
+        return render_template('error.html', message="Internal Server Error"), 500
 
 # Browse by category
 @app.route('/browse/<category>')

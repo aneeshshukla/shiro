@@ -474,7 +474,7 @@
         </div>
         
         <!-- Episodes Section -->
-        {% if not not anime.episodes %}
+        {% if anime.episodes %}
         <div class="episodes-section">
             <div class="section-header">
                 <h2 class="section-title">Episodes</h2>
@@ -483,12 +483,12 @@
             
             <div class="episodes-grid">
                 {% for episode in anime.episodes %}
-                <a href="{{ episode.url }}" class="episode-card">
-                    <!-- <div class="episode-number">EP {{ episode.number }}</div> -->
-                    {% if episode.title %}
-                    <div class="episode-title">{{ episode.title }}</div>
-                    {% endif %}
-                </a>
+                    {% set id_parts = episode.id.split('$') %}
+                    <a href="/watch/{{ id_parts[0] }}?{{ id_parts[1] }}" class="episode-card"> 
+                        {% if episode.title %}
+                        <div class="episode-title">{{ episode.title }}</div>
+                        {% endif %}
+                    </a>
                 {% endfor %}
             </div>
         </div>
