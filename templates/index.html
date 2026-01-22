@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block head %}
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=mic" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=chevron_left,chevron_right" />
 {% endblock %}
 
 {% block extra_css %}
@@ -55,7 +55,8 @@
         right: 0;
         padding: 0 2rem;
         z-index: 2;
-        max-width: 1400px;
+        /* max-width: 1400px; */
+        max-width: 98%;
         margin: 0 auto;
     }
     
@@ -121,6 +122,20 @@
         align-items: center;
         gap: 0.5rem;
     }
+    .hero-btn-icon {
+        display: none !important;
+        padding: 0.8rem 1.4rem;
+        border: none;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
     
     .hero-btn-primary {
         background: #00d166;
@@ -140,7 +155,11 @@
     
     .hero-btn-secondary:hover {
         background: rgba(255,255,255,0.2);
+        transform: translateY(-2px);
     }
+    /* .hero-btn-secondary::before{
+        content: "DETAILS";
+    } */
     
     .hero-nav {
         position: absolute;
@@ -283,7 +302,7 @@
         }
         
         .hero-title {
-            font-size: 1.8rem;
+            font-size: 1.5rem;
         }
         
         .hero-content {
@@ -295,6 +314,18 @@
             bottom: 1rem;
             right: 1rem;
         }
+        .hero-btn{
+            /* content: "WATCH NOW"; */
+            display: none;
+        }
+        .hero-btn-icon{
+            /* content: "WATCH NOW"; */
+            display: block !important;
+        }
+        
+        /* .hero-btn-secondary::before{
+            content: "";
+        } */
     }
     /* .sub{
         background-color: #38211e;
@@ -332,11 +363,17 @@
                         {{ anime.description or 'The inhabitants of a certain wealthy town fear nothing of knowing citizens crime. However, their world is proposed to a task in existence of the former status besides the complete warnings from his aids come later during the inhabitants of other things from his ever changing.' }}
                     </p>
                     <div class="hero-buttons">
-                        <a href="{{ anime.url }}" class="hero-btn hero-btn-primary">
+                        <a href="/watch/{{ anime.id }}" class="hero-btn hero-btn-primary">
                             WATCH NOW
                         </a>
                         <a href="/anime/{{ anime.id }}" class="hero-btn hero-btn-secondary">
-                            DETAIL
+                            DETAILS
+                        </a>
+                        <a href="/watch/{{ anime.id }}" class="hero-btn-icon hero-btn-primary">
+                            <i class="fa-solid fa-play"></i>
+                        </a>
+                        <a href="/anime/{{ anime.id }}" class="hero-btn-icon hero-btn-secondary">
+                            <i class="fa-solid fa-info"></i>
                         </a>
                     </div>
                 </div>
@@ -346,8 +383,8 @@
         
         <div class="hero-nav">
             <span class="hero-counter"><span id="currentSlide">1</span> / {{ spotlight.results|length }}</span>
-            <button class="hero-nav-btn" onclick="changeSlide(-1)">‹</button>
-            <button class="hero-nav-btn" onclick="changeSlide(1)">›</button>
+            <button class="hero-nav-btn" onclick="changeSlide(-1)"><span class="material-symbols-outlined">chevron_left</span></button>
+            <button class="hero-nav-btn" onclick="changeSlide(1)"><span class="material-symbols-outlined">chevron_right</span></button>
         </div>
     </section>
     {% endif %}

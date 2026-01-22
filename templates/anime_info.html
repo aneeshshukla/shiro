@@ -397,7 +397,9 @@
             <div class="poster-section">
                 <img src="{{ anime.image }}" alt="{{ anime.title }}" class="anime-poster">
                 <div class="poster-actions">
-                    <a href="{{ anime.url }}" class="action-btn btn-primary">
+                    <!-- <a href="{{ anime.url }}" class="action-btn btn-primary"> -->
+                    <!-- {% set id_parts = anime.id.split('$') %} -->
+                        <a href="/watch/{{ anime.id }}" class="action-btn btn-primary"> 
                         Watch Now
                     </a>
                     <button class="action-btn btn-secondary">

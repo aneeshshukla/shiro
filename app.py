@@ -7,7 +7,7 @@ from cachetools import TTLCache, cached
 from cachetools.keys import hashkey
 import urllib.parse
 
-cache = TTLCache(maxsize=100, ttl=180)
+cache = TTLCache(maxsize=100, ttl=300)
 
 load_dotenv() 
 
@@ -115,7 +115,7 @@ def watch(episode_id):
         # response = requests.get(api_url, params=params)
         api_response = response
 
-        if not api_response or not api_response.get("ok"):
+        if not api_response or not api_response.get("ok") or api_response.get("count") == 0:
             return render_template('error.html', message="Streaming service unavailable"), 503
 
         # We pass the api_response keys (streams, servers, anime_title) 
