@@ -229,12 +229,12 @@
         </div>
         
         <div class="control-bar">
-            <button class="control-btn"><span>🌙</span> Focus</button>
-            <button class="control-btn active"><span>⏭</span> AutoNext</button>
-            <button class="control-btn"><span>▶</span> AutoPlay</button>
-            <button class="control-btn"><span>⏮</span> Prev</button>
-            <button class="control-btn"><span>⏭</span> Next</button>
-            <button class="control-btn"><span>⚠</span> Report</button>
+            <button class="control-btn"><i class="fa-solid fa-moon"></i> Focus</button>
+            <button class="control-btn active"><i class="fa-solid fa-forward"></i> AutoNext</button>
+            <button class="control-btn"><i class="fa-solid fa-play"></i> AutoPlay</button>
+            <button class="control-btn"><i class="fa-solid fa-backward-step"></i> Prev</button>
+            <button class="control-btn"><i class="fa-solid fa-forward-step"></i></i> Next</button>
+            <button class="control-btn"><i class="fa-solid fa-exclamation"></i> Report</button>
         </div>
         
         {% if servers %}
@@ -265,7 +265,7 @@
                 {% for episode in anime_info.episodes %}
                 {% set id_parts = episode.id.split('$') %}
                 <a href="/watch/{{ id_parts[0] }}?{{ id_parts[1] }}" class="episode-item {% if episode.number|string == current_episode|string %}active{% endif %}">
-                    <div class="episode-number">
+                    <div class="episode-title">
                         {{ episode.number }}. {{ episode.title or 'Episode ' ~ episode.number }}
                     </div>
                 </a>

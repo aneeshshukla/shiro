@@ -84,7 +84,7 @@
     
     .hero-meta {
         display: flex;
-        gap: 1.5rem;
+        gap: 1rem;
         font-size: 0.9rem;
         color: rgba(255,255,255,0.8);
         margin-bottom: 1rem;
@@ -354,8 +354,8 @@
                     </div> -->
                     <h1 class="hero-title">{{ anime.title }}</h1>
                     <div class="hero-meta">
-                        <span>CC {{ anime.sub }}</span>
-                        {% if anime.dub %}<span>🎤 {{ anime.dub }}</span>{% endif%}
+                        <span class="meta-badge sub"><i class="fa-solid fa-closed-captioning"></i> {{ anime.sub }}</span>
+                        {% if anime.dub %}<span class="meta-badge dub"><i class="fa-solid fa-microphone"></i> {{ anime.dub }}</span>{% endif%}
                         <span>{{ anime.releaseDate or 'N/A' }}</span>
                         <span>{{ anime.type or 'TV' }}</span>
                     </div>
@@ -414,8 +414,8 @@
                     <div class="anime-card-content">
                         <h3>{{ anime.title }}</h3>
                         <div class="anime-meta">
-                            <span class="meta-badge sub">{{ anime.sub }}</span>
-                            {% if anime.dub %}<span class="meta-badge dub">{{ anime.dub }}</span>{% endif %}
+                            <span class="meta-badge sub"><i class="fa-solid fa-closed-captioning"></i>{{ anime.sub }}</span>
+                            {% if anime.dub %}<span class="meta-badge dub"><i class="fa-solid fa-microphone"></i>{{ anime.dub }}</span>{% endif %}
                             {% if anime.type %}
                             <span class="meta-badge">{{ anime.type }}</span>
                             {% endif %}
