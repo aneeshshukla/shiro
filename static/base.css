@@ -3,6 +3,27 @@
     padding: 0;
     box-sizing: border-box;
 }
+/* width */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+/*box-shadow: inset 0 0 5px grey;*/ 
+  border-radius: 10px;
+}
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #e06141; 
+  border-radius: 10px;
+}
+
+/* Handle on hover */
+/* ::-webkit-scrollbar-thumb:hover {
+  background: #a04228; 
+} */
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -207,12 +228,12 @@ body {
 }
 
 .episode-number {
-    position: absolute;
-    top: 0.5rem;
-    left: 0.5rem;
-    background: rgba(0, 0, 0, 0.8);
-    padding: 0.3rem 0.6rem;
-    border-radius: 4px;
+    /* position: absolute; */
+    /* top: 0.5rem;
+    left: 0.5rem; */
+    /* background: rgba(0, 0, 0, 0.8); */
+    /* padding: 0.3rem 0.6rem; */
+    /* border-radius: 4px; */
     font-size: 0.8rem;
     font-weight: 600;
 }
@@ -222,7 +243,7 @@ body {
     gap: 1rem;
     margin: 2rem 0 1.5rem;
     border-bottom: 2px solid rgba(255, 255, 255, 0.1);
-    overflow-x: auto;
+    /* overflow-x: auto; */
 }
 
 .tab {
@@ -251,8 +272,8 @@ body {
 @media (max-width: 768px) {
     .navbar {
         flex-direction: column;
-        gap: 1rem;
-        padding: 1rem;
+        /* gap: 1rem; */
+        /* padding: 1rem; */
     }
     
     .navbar-left {
