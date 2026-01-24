@@ -10,7 +10,7 @@
     />
     <title>{% block title %}ShiRo{% endblock %}</title>
     {% block head %}{% endblock %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
     {% block extra_css %}{% endblock %}
 
     <!-- 🔹 Search Autocomplete CSS -->
@@ -137,89 +137,9 @@
     {% block extra_js %}{% endblock %}
 
     <!-- 🔹 Navbar Spacer -->
-    <script>
-      const navbar = document.getElementById('navbar');
-      document.getElementById('spacer').style.height =
-        navbar.scrollHeight + "px";
-    </script>
+    <script src="{{ url_for('static', filename='js/base.js') }}"></script>
 
     <!-- 🔹 Search Autocomplete JS -->
     <script src="https://kit.fontawesome.com/c8e74b97da.js" crossorigin="anonymous"></script>
-    <script>
-      
-      const input = document.getElementById("anime-search");
-      const dropdown = document.getElementById("search-results");
-
-      let controller;
-
-      input.addEventListener("input", async () => {
-        const q = input.value.trim();
-        dropdown.innerHTML = "";
-        dropdown.style.display = "none";
-
-        if (q.length < 2) return;
-
-        if (controller) controller.abort();
-        controller = new AbortController();
-
-        try {
-          const res = await fetch(
-            `/api/search-suggestions/${encodeURIComponent(q)}`,
-            { signal: controller.signal }
-          );
-
-          const data = await res.json();
-          if (!data.results?.length) return;
-          console.log(data.results?.length)
-          dropdown.style.display = "block";
-
-          data.results.forEach(anime => {
-            const div = document.createElement("div");
-            div.className = "search-item";
-
-            div.innerHTML = `
-              <img class="search-poster" src="${anime.image}">
-              <div class="search-info">
-                <div class="search-title">${anime.title}</div>
-                <div class="search-meta">
-                  ${anime.sub ? `<span class="badge badge-cc">CC ${anime.sub}</span>` : ""}
-                  ${anime.episodes ? `<span class="badge badge-ep">${anime.episodes}</span>` : ""}
-                  ${anime.releaseDate ? `<span class="badge badge-year">${anime.releaseDate}</span>` : ""}
-                  ${anime.type ? `<span class="badge badge-type">${anime.type}</span>` : ""}
-                  <!--span class="badge badge-rating">R </span-->
-                </div>
-              </div>
-            `;
-
-            div.onclick = () => {
-              window.location.href = `/anime/${anime.id}`;
-            };
-
-            dropdown.appendChild(div);
-          });
-          const div = document.createElement("div");
-          div.className = "search-item";
-          div.innerHTML = `
-            <center><p>View all results -></p></center>
-        `;
-
-        div.onclick = () => {
-            window.location.href = `/search?q=${encodeURIComponent(q)}`;
-        };
-
-        dropdown.appendChild(div);
-
-
-        } catch (e) {
-          if (e.name !== "AbortError") console.error(e);
-        }
-      });
-
-      document.addEventListener("click", e => {
-        if (!e.target.closest(".search-wrapper")) {
-          dropdown.style.display = "none";
-        }
-      });
-    </script>
 </body>
 </html>
