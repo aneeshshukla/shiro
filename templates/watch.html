@@ -8,80 +8,117 @@
 
 {% block content %}
 <div class="watch-container">
-    <div class="player-section">
-        <nav class="player-nav">
-            <a href="/" class="nav-link">Home</a>
-            <span class="nav-separator">/</span>
-            <span class="nav-link active">{{ anime_info.title }}</span>
-        </nav>
-        
-        <div class="video-wrapper">
-            {% if streams and streams.sources %}
-                <iframe 
-                    id="player-iframe" 
-                    src="{{ streams.sources[0].url }}" 
-                    allowfullscreen="true" 
-                    scrolling="no" 
-                    allow="autoplay; fullscreen"
-                    autoplay>
-                </iframe>
-            {% else %}
-                <div class="video-overlay">
-                    <h2 class="video-title">{{ anime_title }}</h2>
-                    <p class="video-subtitle">Video sources not found.</p>
-                </div>
-            {% endif %}
-        </div>
-        
-        <div class="control-bar">
-            <button class="control-btn"><i class="fa-solid fa-moon"></i> Focus</button>
-            <button class="control-btn active"><i class="fa-solid fa-forward"></i> AutoNext</button>
-            <button class="control-btn"><i class="fa-solid fa-play"></i> AutoPlay</button>
-            <button class="control-btn"><i class="fa-solid fa-backward-step"></i> Prev</button>
-            <button class="control-btn"><i class="fa-solid fa-forward-step"></i></i> Next</button>
-            <button class="control-btn"><i class="fa-solid fa-exclamation"></i> Report</button>
-        </div>
-        
-        {% if servers %}
-        <div class="servers-section">
-            <div class="servers-title" style="color: #888; margin-bottom: 10px; font-size: 0.9rem;">Available Servers:</div>
-            <div class="servers-grid">
-                {% for server in servers %}
-                <button class="server-btn {% if loop.index == 1 %}active{% endif %}" 
-                        onclick="changeServer('{{ server.url }}', this)">
-                    {{ server.name }}
-                </button>
-                {% endfor %}
-            </div>
-        </div>
-        {% endif %}
+    <!-- Breadcrumb -->
+    <div class="breadcrumb-container">
+        <ul class="breadcrumb">
+            <li><a href="/"><i class="fa-solid fa-house"></i> Home</a></li>
+            <li><i class="fa-solid fa-chevron-right separator"></i></li>
+            <li><a href="/anime/{{ anime_info.id }}"><i class="fa-solid fa-circle-info"></i> {{ anime_info.title or anime_title }}</a></li>
+            <li><i class="fa-solid fa-chevron-right separator"></i></li>
+            <li class="active">Episode {{ current_episode }}</li>
+        </ul>
     </div>
-    
-    <aside class="episodes-sidebar">
-        <div class="sidebar-header">
-            <h3 class="sidebar-title">Episodes</h3>
-            <div class="sidebar-search">
-                <input type="text" class="search-input" placeholder="# Find episode...">
-            </div>
-        </div>
-        
-        <div class="episodes-list">
-            {% if anime_info.episodes %}
-                {% for episode in anime_info.episodes %}
-                {% set id_parts = episode.id.split('$') %}
-                <a href="/watch/{{ id_parts[0] }}?{{ id_parts[1] }}" class="episode-item {% if episode.number|string == current_episode|string %}active{% endif %}">
-                    <div class="episode-title">
-                        {{ episode.number }}. {{ episode.title or 'Episode ' ~ episode.number }}
+
+    <div class="watch-grid">
+        <!-- Main Player Column -->
+        <div class="player-column">
+            
+            <!-- Video Player -->
+            <div class="video-wrapper">
+                {% if streams and streams.sources %}
+                    <iframe 
+                        id="player-iframe" 
+                        src="{{ streams.sources[0].url }}" 
+                        allowfullscreen="true" 
+                        scrolling="no" 
+                        allow="autoplay; fullscreen"
+                        autoplay>
+                    </iframe>
+                {% else %}
+                    <div class="video-overlay text-center">
+                        <i class="fa-solid fa-triangle-exclamation" style="font-size: 3rem; color: #555; margin-bottom: 20px;"></i>
+                        <h2 class="video-title">Stream Unavailable</h2>
+                        <p class="video-subtitle">Try switching servers or come back later.</p>
                     </div>
-                </a>
-                {% endfor %}
-            {% else %}
-                <div class="episode-item active">
-                    <div class="episode-number">1 Complete Movie</div>
+                {% endif %}
+            </div>
+
+            <!-- Pre-Player Toolbar -->
+            <div class="player-toolbar">
+                <div class="server-list">
+                    <span class="toolbar-label"><i class="fa-solid fa-server"></i> Servers:</span>
+                    {% if servers %}
+                        {% for server in servers %}
+                        <button class="server-btn {% if loop.index == 1 %}active{% endif %}" 
+                                onclick="changeServer('{{ server.url }}', this)">
+                            {{ server.name }}
+                        </button>
+                        {% endfor %}
+                    {% else %}
+                        <span style="color: #666; font-size: 0.9rem;">Default</span>
+                    {% endif %}
                 </div>
-            {% endif %}
+                
+                <div class="control-list">
+                    <button class="control-btn" title="Focus Mode"><i class="fa-solid fa-expand"></i> Focus</button>
+                    <!-- <button class="control-btn active" title="Auto Next"><i class="fa-solid fa-forward"></i> Auto</button> -->
+                </div>
+            </div>
+
+            <!-- Episode Navigation (Prev/Next) -->
+            <div class="episode-nav-bar">
+                 <!-- Logic to find Prev/Next IDs would be ideal here if available, 
+                      currently manual or JS based might be needed if IDs are complex. 
+                      For now, simple buttons. -->
+                <button class="nav-btn prev"><i class="fa-solid fa-chevron-left"></i> Prev Ep</button>
+                <button class="nav-btn next">Next Ep <i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+
+            <div class="watch-info">
+                <h1>{{ anime_info.title or anime_title }}</h1>
+                <p>Episode {{ current_episode }}</p>
+                <p class="description">{{ anime_info.description }}</p>
+            </div>
+
         </div>
-    </aside>
+
+        <!-- Sidebar: Episode List -->
+        <aside class="episodes-sidebar">
+            <div class="sidebar-header">
+                <h3>Episodes</h3>
+                <div class="search-box">
+                    <input type="text" class="search-input" placeholder="Search Number...">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </div>
+            </div>
+            
+            <div class="episodes-scroller">
+                {% if anime_info.episodes %}
+                    {% for episode in anime_info.episodes %}
+                    <!-- Handle complex IDs with $ separator if needed -->
+                    {% set id_parts = episode.id.split('$') %}
+                    {% set safe_id = id_parts[0] %}
+                    {% set query = id_parts[1] if id_parts|length > 1 else '' %}
+                    
+                    <a href="/watch/{{ safe_id }}?{{ query }}" 
+                       class="ep-item {% if episode.number|string == current_episode|string %}active{% endif %}"
+                       data-number="{{ episode.number }}">
+                        <div class="ep-num">{{ episode.number }}</div>
+                        <div class="ep-details">
+                            <div class="ep-title">{{ episode.title or 'Episode ' ~ episode.number }}</div>
+                            <!-- <div class="ep-len">24m</div> -->
+                        </div>
+                        {% if episode.number|string == current_episode|string %}
+                        <div class="now-playing-icon"><i class="fa-solid fa-play"></i></div>
+                        {% endif %}
+                    </a>
+                    {% endfor %}
+                {% else %}
+                     <div class="ep-item">No episodes found.</div>
+                {% endif %}
+            </div>
+        </aside>
+    </div>
 </div>
 {% endblock %}
 
@@ -115,9 +152,9 @@
     if (searchInput) {
         searchInput.addEventListener('input', function(e) {
             const term = e.target.value.toLowerCase();
-            document.querySelectorAll('.episode-item').forEach(item => {
+            document.querySelectorAll('.ep-item').forEach(item => {
                 const text = item.textContent.toLowerCase();
-                item.style.display = text.includes(term) ? 'block' : 'none';
+                item.style.display = text.includes(term) ? 'flex' : 'none';
             });
         });
     }

@@ -1,7 +1,15 @@
-document.getElementById('spacer').style.height = document.getElementById('navbar').scrollHeight + "px";
-
 const input = document.getElementById("anime-search");
 const dropdown = document.getElementById("search-results");
+const mobileBtn = document.getElementById("mobile-menu-btn");
+const navLinks = document.getElementById("nav-links");
+
+if (mobileBtn) {
+    mobileBtn.addEventListener('click', () => {
+        navLinks.classList.toggle('active');
+        // Toggle icon if desired, or assume 'bars' is sufficient
+    });
+}
+
 
 let controller;
 

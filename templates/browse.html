@@ -1,43 +1,69 @@
 {% extends "base.html" %}
 
 {% block title %}{{ category|title }} - ShiRo{% endblock %}
-{%block extra_css%}
-<style>
-    .anime-grid{
-        padding: 5%;
-    }
-</style>
-{%endblock%}
+
+{% block head %}
+<!-- FontAwesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/browse.css') }}">
+{% endblock %}
+
 {% block content %}
-    <h2 class="section-title">{{ category|title|replace('-', ' ') }}</h2>
+<div class="container browse-container">
+    <div class="browse-header">
+        <h2 class="browse-title">{{ category|title|replace('-', ' ') }}</h2>
+    </div>
     
-    {% if data and data.results %}
+    {% if data %}
         <div class="anime-grid">
-            {% for anime in data.results %}
-            <a href="/anime/{{ anime.id }}" style="text-decoration: none; color: inherit;">
-                <div class="anime-card">
-                    <img src="{{ anime.image }}" alt="{{ anime.title }}">
-                    <div class="anime-card-content">
-                        <h3>{{ anime.title }}</h3>
-                        <p class="meta">{{ anime.releaseDate or 'N/A' }} • {{ anime.subOrDub }}</p>
+            {# Robustly handle list vs dict #}
+            {% set anime_list = data.results if data.results is defined else data %}
+            
+            {% if anime_list %}
+                {% for anime in anime_list %}
+                <a href="/anime/{{ anime.id }}" class="anime-card-link" style="display: block; text-decoration: none;">
+                    <div class="anime-card">
+                        <img src="{{ anime.image }}" alt="{{ anime.title }}" loading="lazy">
+                        <div class="play-icon"><i class="fa-solid fa-play"></i></div>
+                        
+                        <div class="anime-card-overlay">
+                            <div class="card-title">{{ anime.title }}</div>
+                            <div class="card-meta">
+                                <span>{{ anime.releaseDate or 'N/A' }}</span>
+                                {% if anime.subOrDub %} • <span>{{ anime.subOrDub|upper }}</span>{% endif %}
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </a>
-            {% endfor %}
+                </a>
+                {% endfor %}
+            {% else %}
+               <div class="no-data">No anime found in this category.</div>
+            {% endif %}
         </div>
         
-        {% if data.hasNextPage or page > 1 %}
+        {# Pagination Logic - Only show if we suspect more pages #}
+        {# Some APIs return hasNextPage, others don't. We'll show Next if we have a full page of results (usually 20+) #}
+        {% if (data.hasNextPage is defined and data.hasNextPage) or (anime_list|length >= 20) or page > 1 %}
         <div class="pagination">
             {% if page > 1 %}
-            <a href="?page={{ page - 1 }}">← Previous</a>
+            <a href="?page={{ page - 1 }}"><i class="fa-solid fa-chevron-left"></i> Previous</a>
             {% endif %}
+            
             <span class="current">Page {{ page }}</span>
-            {% if data.hasNextPage %}
-            <a href="?page={{ page + 1 }}">Next →</a>
+            
+            {% if (data.hasNextPage is defined and data.hasNextPage) or (anime_list|length >= 20) %}
+            <a href="?page={{ page + 1 }}">Next <i class="fa-solid fa-chevron-right"></i></a>
             {% endif %}
         </div>
         {% endif %}
+        
     {% else %}
-        <p style="text-align: center; margin-top: 3rem;">No anime found.</p>
+        <div class="no-data">
+            <p>Unable to load content at the moment.</p>
+        </div>
     {% endif %}
+</div>
 {% endblock %}

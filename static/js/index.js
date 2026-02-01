@@ -1,35 +1,32 @@
-let currentSlide = 0;
+document.addEventListener('DOMContentLoaded', () => {
     const slides = document.querySelectorAll('.hero-slide');
+    let currentSlide = 0;
     const totalSlides = slides.length;
-    
+    const intervalTime = 6000; // 6 seconds per slide
+
+    if (totalSlides === 0) return;
+
     function showSlide(index) {
-        if (index >= totalSlides) {
-            currentSlide = 0;
-        } else if (index < 0) {
-            currentSlide = totalSlides - 1;
-        } else {
-            currentSlide = index;
-        }
-        
-        slides.forEach((slide, i) => {
-            slide.classList.toggle('active', i === currentSlide);
+        // Remove active class from all
+        slides.forEach(slide => {
+            slide.classList.remove('active');
+            slide.classList.remove('prev'); // optional for more complex animations
         });
-        
-        document.getElementById('currentSlide').textContent = currentSlide + 1;
+
+        // Add active to current
+        slides[index].classList.add('active');
     }
-    
-    function changeSlide(direction) {
-        showSlide(currentSlide + direction);
+
+    function nextSlide() {
+        currentSlide = (currentSlide + 1) % totalSlides;
+        showSlide(currentSlide);
     }
-    
-    setInterval(() => {
-        changeSlide(1);
-    }, 11000);
-    
-    // Tab functionality
-    document.querySelectorAll('.tab').forEach(tab => {
-        tab.addEventListener('click', function() {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            this.classList.add('active');
-        });
-    });
+
+    // Auto Advance
+    let slideInterval = setInterval(nextSlide, intervalTime);
+
+    // Optional: Pause on hover if we added controls later
+    // const heroSection = document.querySelector('.hero-section');
+    // heroSection.addEventListener('mouseenter', () => clearInterval(slideInterval));
+    // heroSection.addEventListener('mouseleave', () => slideInterval = setInterval(nextSlide, intervalTime));
+});

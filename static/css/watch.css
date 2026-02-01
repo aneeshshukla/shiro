@@ -1,72 +1,100 @@
-body {
-    background: #0f0f0f;
-    margin: 0;
-    padding: 0;
-}
-
+/* --- Watch Page Layout --- */
 .watch-container {
-    display: grid;
-    grid-template-columns: 1fr 400px;
-    gap: 0;
-    max-width: 100%;
-    margin: 0;
-    height: 100vh;
-    overflow: hidden;
-    margin-right: 10px;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px 40px;
 }
 
-/* Left Side - Player Section */
-.player-section {
-    background: #000;
+/* Breadcrumb Styling */
+.breadcrumb-container {
+    margin-bottom: 25px;
+    padding: 12px 20px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+}
+
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    gap: 8px;
+    font-size: 0.9rem;
+    color: #888;
+}
+
+.breadcrumb li {
+    display: flex;
+    align-items: center;
+}
+
+.breadcrumb a {
+    color: #ccc;
+    text-decoration: none;
+    transition: color 0.2s, background 0.2s;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.breadcrumb a:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.breadcrumb .separator {
+    color: #444;
+    font-size: 0.8rem;
+    margin: 0 4px;
+}
+
+.breadcrumb .active {
+    color: var(--primary);
+    font-weight: 600;
+    background: rgba(229, 9, 20, 0.1);
+    padding: 4px 10px;
+    border-radius: 4px;
+    border: 1px solid rgba(229, 9, 20, 0.2);
+}
+
+.breadcrumb i { font-size: 0.8rem; }
+
+.watch-grid {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 30px;
+}
+
+/* --- Player Column --- */
+.player-column {
     display: flex;
     flex-direction: column;
-    height: 100vh;
-    overflow-y: auto;
+    gap: 20px;
 }
 
-/* Navigation Bar */
-.player-nav {
-    background: rgba(20, 20, 20, 0.95);
-    backdrop-filter: blur(10px);
-    padding: 1rem 2rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    flex-shrink: 0;
-}
-
-.nav-link {
-    color: rgba(255, 255, 255, 0.7);
-    text-decoration: none;
-    font-size: 0.95rem;
-    transition: color 0.3s;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.nav-link:hover { color: #fff; }
-.nav-separator { color: rgba(255, 255, 255, 0.3); }
-.nav-link.active { color: #fff; font-weight: 600; }
-
-/* Iframe Wrapper */
 .video-wrapper {
     position: relative;
-    background: #000;
     width: 100%;
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 0;
+    padding-top: 56.25%; /* 16:9 Aspect Ratio */
+    background: #000;
+    border-radius: 8px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    overflow: hidden;
 }
 
-#player-iframe {
+.video-wrapper iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     border: none;
-    background: #000;
 }
 
 .video-overlay {
@@ -75,120 +103,264 @@ body {
     left: 50%;
     transform: translate(-50%, -50%);
     text-align: center;
+    width: 100%;
 }
 
 .video-title {
-    font-size: 2rem;
-    color: rgba(255, 255, 255, 0.9);
-    margin-bottom: 0.5rem;
+    color: #fff;
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+}
+.video-subtitle { color: #888; }
+
+/* Control Toolbar */
+.player-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #1a1a1a;
+    padding: 15px 20px;
+    border-radius: 8px;
+    flex-wrap: wrap;
+    gap: 15px;
 }
 
-/* Control Bar */
-.control-bar {
-    background: rgba(20, 20, 20, 0.95);
-    backdrop-filter: blur(10px);
-    padding: 1rem 2rem;
+.server-list {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    flex-shrink: 0;
+    gap: 10px;
     flex-wrap: wrap;
+}
+
+.toolbar-label {
+    color: #888;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-right: 5px;
+}
+
+.server-btn {
+    background: #333;
+    color: #ccc;
+    border: none;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+}
+
+.server-btn:hover { background: #444; color: #fff; }
+.server-btn.active {
+    background: var(--primary); /* Orange */
+    color: #fff;
+    box-shadow: 0 2px 10px rgba(229, 9, 20, 0.4);
+}
+
+.control-list {
+    display: flex;
+    gap: 10px;
 }
 
 .control-btn {
     background: transparent;
-    border: none;
-    color: rgba(255, 255, 255, 0.7);
+    color: #aaa;
+    border: 1px solid #333;
+    padding: 6px 14px;
+    border-radius: 4px;
+    font-size: 0.85rem;
     cursor: pointer;
-    font-size: 0.9rem;
+    transition: all 0.2s;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    transition: all 0.3s;
+    gap: 6px;
+}
+.control-btn:hover { border-color: #666; color: #fff; }
+.control-btn.active { border-color: var(--accent-green); color: var(--accent-green); }
+
+/* Episode Navigation Bar */
+.episode-nav-bar {
+    display: flex;
+    justify-content: space-between;
 }
 
-.control-btn:hover { background: rgba(255, 255, 255, 0.1); color: #fff; }
-.control-btn.active { color: #ff5722; }
+.nav-btn {
+    background: #252525;
+    color: #fff;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.2s;
+    text-decoration: none;
+}
+.nav-btn:hover { background: #333; }
+.nav-btn.prev { border-right: 1px solid #333; } 
 
-/* Right Sidebar - Episodes */
+/* Watch Info */
+.watch-info h1 {
+    font-size: 1.8rem;
+    margin-bottom: 5px;
+    color: #fff;
+}
+.watch-info p {
+    color: #888;
+    line-height: 1.5;
+}
+.watch-info .description {
+    margin-top: 15px;
+    color: #bbb;
+    font-size: 0.95rem;
+    max-width: 900px;
+}
+
+
+/* --- Sidebar --- */
 .episodes-sidebar {
     background: #1a1a1a;
-    height: 100vh;
+    border-radius: 8px;
+    height: 800px; /* Fixed height for scroll */
     display: flex;
     flex-direction: column;
-    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
 }
 
-.sidebar-header { padding: 1.5rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1); flex-shrink: 0; }
-.sidebar-title { font-size: 1.2rem; font-weight: 600; color: #fff; margin: 0 0 1rem 0; }
+.sidebar-header {
+    padding: 20px;
+    border-bottom: 1px solid #2a2a2a;
+    background: #202020;
+}
+
+.sidebar-header h3 {
+    margin: 0 0 15px;
+    font-size: 1.1rem;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.search-box {
+    position: relative;
+    width: 100%;
+}
 
 .search-input {
     width: 100%;
-    padding: 0.7rem 1rem;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
+    background: #111;
+    border: 1px solid #333;
+    padding: 10px 15px 10px 35px;
+    border-radius: 4px;
     color: #fff;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+.search-input:focus { border-color: var(--primary); }
+
+.search-box i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+    font-size: 0.8rem;
 }
 
-/* Episodes List */
-.episodes-list {
+.episodes-scroller {
     flex: 1;
     overflow-y: auto;
-    padding: 1rem;
+    padding: 10px;
 }
+/* Custom Scrollbar for list */
+.episodes-scroller::-webkit-scrollbar { width: 6px; }
+.episodes-scroller::-webkit-scrollbar-track { background: #1a1a1a; }
+.episodes-scroller::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
 
-.episode-item {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    padding: 1rem;
-    margin-bottom: 0.75rem;
-    text-decoration: none;
-    color: inherit;
-    display: block;
-    transition: 0.3s;
-}
-
-.episode-item:hover { background: rgba(255, 255, 255, 0.08); }
-.episode-item.active {
-    background: rgba(255, 87, 34, 0.1);
-    border-color: #ff5722;
-    color: #ff5722;
-}
-
-/* Servers Section */
-.servers-section {
-    padding: 1.5rem 2rem;
-    background: rgba(255, 255, 255, 0.02);
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.servers-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-    gap: 0.5rem;
-}
-
-.server-btn {
-    padding: 0.6rem;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+.ep-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
     border-radius: 6px;
+    color: #ccc;
+    text-decoration: none;
+    transition: all 0.2s;
+    margin-bottom: 4px;
+}
+
+.ep-item:hover {
+    background: #252525;
     color: #fff;
-    cursor: pointer;
+}
+
+.ep-item.active {
+    background: rgba(229, 9, 20, 0.1); 
+    border-left: 3px solid var(--primary);
+    padding-left: 9px; /* Adjust for border */
+}
+
+.ep-num {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #666;
+    width: 25px;
     text-align: center;
 }
+.ep-item.active .ep-num { color: var(--primary); }
 
-.server-btn.active { color: #ff5722; border-color: #ff5722; background: rgba(255, 87, 34, 0.05); }
+.ep-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
 
-/* Mobile Handling */
-@media (max-width: 992px) {
-    .watch-container { grid-template-columns: 1fr; height: auto; overflow: visible; }
-    .episodes-sidebar { height: auto; max-height: 500px; border-left: none; border-top: 1px solid #333; }
-    .video-wrapper { aspect-ratio: 16 / 9; flex: none; }
-    .player-section { height: auto; }
+.ep-title {
+    font-size: 0.9rem;
+    font-weight: 500;
+    line-height: 1.2;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.ep-item.active .ep-title { color: #fff; }
+
+.now-playing-icon {
+    font-size: 0.8rem;
+    color: var(--primary);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.5; transform: scale(0.9); }
+    50% { opacity: 1; transform: scale(1.1); }
+    100% { opacity: 0.5; transform: scale(0.9); }
+}
+
+/* --- Responsive --- */
+@media (max-width: 1000px) {
+    .watch-grid {
+        grid-template-columns: 1fr;
+    }
+    .episodes-sidebar { height: 500px; }
+}
+
+@media (max-width: 600px) {
+    .video-wrapper {
+        border-radius: 0; 
+        margin: 0 -20px; /* Full width on mobile */
+        width: calc(100% + 40px);
+    }
+    .player-toolbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .control-list { width: 100%; justify-content: space-between; }
 }

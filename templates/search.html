@@ -1,87 +1,129 @@
-
 {% extends "base.html" %}
 
-{% block title %}Search - ShiRo{% endblock %}
+{% block title %}Search Results - ShiRo{% endblock %}
 
-{%block extra_css%}
-<style>
-    .anime-grid{
-        padding: 5%;
-    }
-</style>
-{%endblock%}
+{% block head %}
+<!-- FontAwesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/search.css') }}">
+{% endblock %}
 
 {% block content %}
+<div class="container search-page-container">
     {% if query %}
-        <h2 class="section-title">Search Results for "{{ query }}"</h2>
+    <div class="filter-container">
+        <div class="filter-header">
+            <h2>BROWSER</h2>
+            <div class="filter-count">
+                {% set res_count = results.results|length if results and results.results else (results|length if results else 0) %}
+                {{ res_count }} anime
+            </div>
+        </div>
         
-        {% if results and results.results %}
+        <form action="/search" method="get" class="filter-bar">
+            <!-- Search Input -->
+            <div class="filter-input-wrapper">
+                <input type="text" name="q" placeholder="Search..." value="{{ query or '' }}" autocomplete="off">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </div>
+            
+            <!-- Filters -->
+            <div class="filter-select-wrapper">
+                <select name="type">
+                    <option value="">Type</option>
+                    <option value="Movie">Movie</option>
+                    <option value="TV">TV</option>
+                    <option value="OVA">OVA</option>
+                    <option value="ONA">ONA</option>
+                </select>
+            </div>
+            <div class="filter-select-wrapper">
+                <select name="genre">
+                    <option value="">Genre</option>
+                    <option value="Action">Action</option>
+                    <option value="Adventure">Adventure</option>
+                    <option value="Comedy">Comedy</option>
+                    <option value="Drama">Drama</option>
+                    <option value="Fantasy">Fantasy</option>
+                </select>
+            </div>
+             <div class="filter-select-wrapper">
+                <select name="status">
+                    <option value="">Status</option>
+                    <option value="Finished Airing">Finished</option>
+                    <option value="Currently Airing">Airing</option>
+                    <option value="Not yet aired">Upcoming</option>
+                </select>
+            </div>
+             <div class="filter-select-wrapper">
+                <select name="sort">
+                    <option value="">Most relevance</option>
+                    <option value="latest">Latest</option>
+                    <option value="popular">Popular</option>
+                </select>
+            </div>
+
+            <!-- Buttons -->
+            <button type="button" class="filter-btn-settings"><i class="fa-solid fa-sliders"></i></button>
+            <button type="submit" class="filter-btn-submit"><i class="fa-solid fa-filter"></i> Filter</button>
+        </form>
+    </div>
+        
+        {# Normalize results: could be list or dict with 'results' key #}
+        {% set anime_list = results.results if results and results.results is defined else (results if results else []) %}
+
+        {% if anime_list %}
             <div class="anime-grid">
-                {% for anime in results.results %}
-                <a href="/anime/{{ anime.id }}" style="text-decoration: none; color: inherit;">
+                {% for anime in anime_list %}
+                <a href="/anime/{{ anime.id }}" class="anime-card-link" style="text-decoration: none; display: block;">
                     <div class="anime-card">
-                        <img src="{{ anime.image }}" alt="{{ anime.title }}">
-                        <div class="anime-card-content">
-                            <h3>{{ anime.title }}</h3>
-                            <p class="meta">{{ anime.type }} • <span>CC {{ anime.sub }}</span> {% if anime.dub %}<span>🎤 {{ anime.dub }}</span>{% endif%}</p>
+                        <img src="{{ anime.image }}" alt="{{ anime.title }}" loading="lazy">
+                        <div class="play-icon"><i class="fa-solid fa-play"></i></div>
+                        
+                        <div class="anime-card-overlay">
+                            <div class="card-title">{{ anime.title }}</div>
+                            <div class="card-meta">
+                                <span>{{ anime.releaseDate or anime.type or 'TV' }}</span>
+                                {% if anime.sub %} • <span title="Sub"><i class="fa-solid fa-closed-captioning"></i> {{ anime.sub }}</span>{% endif %}
+                                {% if anime.dub %} • <span title="Dub"><i class="fa-solid fa-microphone"></i> {{ anime.dub }}</span>{% endif %}
+                            </div>
                         </div>
                     </div>
                 </a>
                 {% endfor %}
             </div>
             
-            {% if results.hasNextPage or results.totalPages > 1 %}
+            {# Pagination Logic #}
+            {% if (results.hasNextPage is defined and results.hasNextPage) or (anime_list|length >= 20) or page > 1 %}
             <div class="pagination">
                 {% if page > 1 %}
-                <a href="?q={{ query }}&page={{ page - 1 }}">← Previous</a>
+                <a href="?q={{ query }}&page={{ page - 1 }}"><i class="fa-solid fa-chevron-left"></i> Previous</a>
                 {% endif %}
+                
                 <span class="current">Page {{ page }}</span>
-                {% if results.hasNextPage %}
-                <a href="?q={{ query }}&page={{ page + 1 }}">Next →</a>
+                
+                {% if (results.hasNextPage is defined and results.hasNextPage) or (anime_list|length >= 20) %}
+                <a href="?q={{ query }}&page={{ page + 1 }}">Next <i class="fa-solid fa-chevron-right"></i></a>
                 {% endif %}
             </div>
             {% endif %}
+
         {% else %}
-            <p style="text-align: center; margin-top: 3rem; font-size: 1.2rem;">
-                No results found for "{{ query }}"
-            </p>
+            <div class="no-results">
+                <i class="fa-solid fa-magnifying-glass-minus"></i>
+                <h3>No results found</h3>
+                <p>We couldn't find any anime matching "{{ query }}". Try different keywords.</p>
+            </div>
         {% endif %}
     {% else %}
-    <!-- <h2 class="section-title">Search Results for "{{ query }}"</h2> -->
-        
-        {% if results and results.results %}
-            <div class="anime-grid">
-                {% for anime in results.results %}
-                <a href="/anime/{{ anime.id }}" style="text-decoration: none; color: inherit;">
-                    <div class="anime-card">
-                        <img src="{{ anime.image }}" alt="{{ anime.title }}">
-                        <div class="anime-card-content">
-                            <h3>{{ anime.title }}</h3>
-                            <p class="meta">{{ anime.type }} • <span>CC {{ anime.sub }}</span> {% if anime.dub %}<span>🎤 {{ anime.dub }}</span>{% endif%}</p>
-                        </div>
-                    </div>
-                </a>
-                {% endfor %}
-            </div>
-            
-            {% if results.hasNextPage or page > 1 %}
-            <div class="pagination">
-                {% if page > 1 %}
-                <a href="?q={{ query }}&page={{ page - 1 }}">← Previous</a>
-                {% endif %}
-                <span class="current">Page {{ page }}</span>
-                {% if results.hasNextPage %}
-                <a href="?q={{ query }}&page={{ page + 1 }}">Next →</a>
-                {% endif %}
-            </div>
-            {% endif %}
-        {% else %}
-            <p style="text-align: center; margin-top: 3rem; font-size: 1.2rem;">
-                No results found for "{{ query }}"
-            </p>
-        {% endif %}
-        <!-- <p style="text-align: center; margin-top: 3rem; font-size: 1.2rem;">
-            Enter a search term to find anime
-        </p> -->
+        <div class="no-results" style="padding-top: 10%;">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <h3>Search Anime</h3>
+            <p>Type in the search bar above to find your favorite anime.</p>
+        </div>
     {% endif %}
+</div>
 {% endblock %}

@@ -7,116 +7,190 @@
 {% endblock %}
 
 {% block content %}
-    <!-- Banner Section -->
-    <div class="anime-banner">
-        <img src="{{ anime.image }}" alt="{{ anime.title }}" class="banner-image">
-        <div class="banner-gradient"></div>
+    <!-- 2. Breadcrumb Navigation -->
+    <div class="breadcrumb-container">
+        <ul class="breadcrumb">
+            <li><a href="/">Home</a></li>
+            <li><span class="separator">></span></li>
+            <li><a href="/browse/{{ anime.type|lower if anime.type else 'tv' }}">{{ anime.type or 'Anime' }}</a></li>
+            <li><span class="separator">></span></li>
+            <li class="active">{{ anime.title }}</li>
+        </ul>
     </div>
-    
-    <!-- Main Content -->
-    <div class="anime-container">
-        <div class="anime-header">
-            <!-- Poster Section -->
-            <div class="poster-section">
-                <img src="{{ anime.image }}" alt="{{ anime.title }}" class="anime-poster">
-                <div class="poster-actions">
-                    <!-- <a href="{{ anime.url }}" class="action-btn btn-primary"> -->
-                    <!-- {% set id_parts = anime.id.split('$') %} -->
-                        <a href="/watch/{{ anime.id }}" class="action-btn btn-primary"> 
-                        Watch Now
-                    </a>
-                    <button class="action-btn btn-secondary">
-                        Add to List
-                    </button>
-                    <button class="action-btn btn-secondary">
-                        Favorite
-                    </button>
+
+    <!-- 3. Hero Section (Primary Area) -->
+    <div class="hero-wrapper">
+        <!-- Background Blur -->
+        <div class="hero-bg" style="background-image: url('{{ anime.image }}');"></div>
+        <div class="hero-overlay"></div>
+
+        <div class="hero-grid">
+            <!-- 3.1 Poster Column -->
+            <div class="hero-poster">
+                <div class="poster-card">
+                    <img src="{{ anime.image }}" alt="{{ anime.title }}">
+                    <div class="w2g-overlay" title="Watch2gether">
+                        <i class="fa-solid fa-users-viewfinder"></i>
+                    </div>
                 </div>
             </div>
-            
-            <!-- Info Section -->
-            <div class="info-section">
-                <div>
-                    {% if anime.title %}
-                        <h1 class="anime-title">{{ anime.title }}</h1>
-                        {% if anime.japaneseTitle %}
-                            <h2 class="anime-subtitle">{{ anime.japaneseTitle }}</h2>
-                        {% endif %}
+
+            <!-- 3.2 Main Info Column -->
+            <div class="hero-info">
+                <h1 class="info-title">{{ anime.title }}</h1>
+                
+                <div class="info-badges">
+                    <span class="badge-rating">{{ anime.rating or 'PG-13' }}</span>
+                    <span class="badge-quality">{{ anime.quality or 'HD' }}</span>
+                    <span class="badge-sub"><i class="fa-solid fa-closed-captioning"></i> {{ anime.sub or '?' }}</span>
+                    {% if anime.dub %}<span class="badge-dub"><i class="fa-solid fa-microphone"></i> {{ anime.dub }}</span>{% endif %}
+                    <span class="badge-type">{{ anime.type or 'TV' }}</span>
+                    <span class="badge-duration">{{ anime.duration or '24m' }}</span>
+                </div>
+
+                <div class="info-actions">
+                    {% if anime.episodes and anime.episodes|length > 0 %}
+                        {% set first_ep = anime.episodes[0] %}
+                        {% set first_ep_id = first_ep.id.split('$')[0] if '$' in first_ep.id else first_ep.id %}
+                        <!-- Handle episode ID params if complex -->
+                        <a href="/watch/{{ anime.id }}?ep=1" class="btn btn-watch-now">
+                            <i class="fa-solid fa-play"></i> Watch Now
+                        </a>
                     {% else %}
-                        <h1 class="anime-title">{{ anime.japaneseTitle }}</h1>
+                        <button class="btn btn-watch-now disabled" disabled>Not Available</button>
                     {% endif %}
+                    <button class="btn btn-add-list"><i class="fa-solid fa-plus"></i> Add to List</button>
                 </div>
-                
-                <div class="meta-badges">
-                    {% if anime.status %}
-                    <span class="badge badge-status">● {{ anime.status }}</span>
-                    {% endif %}
-                    {% if anime.type %}
-                    <span class="badge badge-type">{{ anime.type }}</span>
-                    {% endif %}
-                    {% if anime.season %}
-                    <span class="badge badge-season">{{ anime.season }}</span>
-                    {% endif %}
-                    {% if anime.totalEpisodes %}
-                    <span class="badge badge-episodes">{{ anime.totalEpisodes }} Episodes</span>
-                    {% endif %}
+
+                <div class="info-synopsis">
+                    <p>{{ anime.description }}</p>
                 </div>
-                
-                <div class="anime-description">
-                    {{ anime.description or 'No description available for this anime.' }}
+
+                <!-- <div class="share-block">
+                    <span>Share Anime:</span>
+                    <div class="share-icons">
+                        <a href="#" class="share-icon fb"><i class="fa-brands fa-facebook-f"></i></a>
+                        <a href="#" class="share-icon tw"><i class="fa-brands fa-twitter"></i></a>
+                        <a href="#" class="share-icon rd"><i class="fa-brands fa-reddit-alien"></i></a>
+                        <a href="#" class="share-icon tg"><i class="fa-brands fa-telegram"></i></a>
+                    </div>
+                </div> -->
+            </div>
+
+            <!-- 3.3 Metadata Column -->
+            <div class="hero-meta">
+                <div class="meta-row">
+                    <span class="meta-label">Japanese:</span>
+                    <span class="meta-value">{{ anime.japaneseTitle or '-' }}</span>
                 </div>
-                
-                <div class="info-grid">
-                    {% if anime.releaseDate %}
-                    <div class="info-item">
-                        <div class="info-label">Release Date</div>
-                        <div class="info-value">{{ anime.releaseDate }}</div>
-                    </div>
-                    {% endif %}
-                    
-                    {% if anime.subOrDub %}
-                    <div class="info-item">
-                        <div class="info-label">Audio</div>
-                        <div class="info-value">{% if anime.hasSub %}SUB{% endif%}{% if anime.hasDub %}, DUB{% endif%}</div>
-                    </div>
-                    {% endif %}
-                    
-                    {% if anime.studios %}
-                    <div class="info-item">
-                        <div class="info-label">Studio</div>
-                        <div class="info-value">{{ anime.studios|join(', ') }}</div>
-                    </div>
-                    {% endif %}
-                    
-                    {% if anime.genres %}
-                    <div class="info-item">
-                        <div class="info-label">Genres</div>
-                        <div class="info-value">{{ anime.genres|join(', ') }}</div>
-                    </div>
-                    {% endif %}
+                <!-- Assuming synonyms isn't strictly passed, omitting if generic API -->
+                <div class="meta-row">
+                    <span class="meta-label">Aired:</span>
+                    <span class="meta-value">{{ anime.releaseDate or '-' }}</span>
+                </div>
+                <div class="meta-row">
+                    <span class="meta-label">Premiered:</span>
+                    <span class="meta-value">{{ anime.season or '-' }}</span>
+                </div>
+                <div class="meta-row">
+                    <span class="meta-label">Duration:</span>
+                    <span class="meta-value">{{ anime.duration or '-' }}</span>
+                </div>
+                <div class="meta-row">
+                    <span class="meta-label">Status:</span>
+                    <span class="meta-value">{{ anime.status or '-' }}</span>
+                </div>
+                <div class="meta-row">
+                    <span class="meta-label">MAL Score:</span>
+                    <span class="meta-value">{{ anime.malScore or 'N/A' }}</span>
+                </div>
+                <div class="meta-divider"></div>
+                <div class="meta-row">
+                    <span class="meta-label">Genres:</span>
+                    <span class="meta-value tags">
+                        {% for genre in anime.genres[1].replace('Genres: ', '').split(', ') %}
+                        <a href="/genre/{{ genre.strip() }}">{{ genre.strip() }}</a>
+                        {% endfor %}
+                    </span>
+                </div>
+                <div class="meta-row">
+                    <span class="meta-label">Studios:</span>
+                    <span class="meta-value" style="color: var(--primary);">{{ anime.studios|join(', ') }}</span>
+                </div>
+                <div class="meta-row">
+                    <span class="meta-label">Producers:</span>
+                    <span class="meta-value">{{ anime.producers|join(', ') if anime.producers else 'Unknown' }}</span>
                 </div>
             </div>
         </div>
-        
-        <!-- Episodes Section -->
-        {% if anime.episodes %}
-        <div class="episodes-section">
-            <div class="section-header">
-                <h2 class="section-title">Episodes</h2>
-                <div class="episode-count">{{ anime.episodes|length }} Episodes</div>
-            </div>
-            
-            <div class="episodes-grid">
-                {% for episode in anime.episodes %}
-                    {% set id_parts = episode.id.split('$') %}
-                    <a href="/watch/{{ id_parts[0] }}?{{ id_parts[1] }}" class="episode-card"> 
-                        {% if episode.title %}
-                        <div class="episode-title">{{ episode.title }}</div>
-                        {% endif %}
+    </div>
+
+    <!-- Main Content + Sidebar Layout -->
+    <div class="content-container">
+        <div class="main-body">
+            <!-- 4. Season Selector -->
+            {% if anime.seasons and anime.seasons|length > 1 %}
+            <div class="season-section">
+                <h3>More Seasons</h3>
+                <div class="season-list">
+                    {% for season in anime.seasons %}
+                    <a href="#" class="season-card {% if season.isCurrent %}active{% endif %}">
+                        <div class="season-poster" style="background-image: url('{{ season.poster }}');"></div>
+                        <div class="season-title">{{ season.title }}</div>
                     </a>
-                {% endfor %}
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- 5. Recommendation Section -->
+            <div class="rec-section">
+                <h2 class="section-title">Recommended for you</h2>
+                <div class="rec-grid">
+                    {% set recs = anime.recommendations if anime.recommendations else (anime.relatedAnime if anime.relatedAnime else []) %}
+                    {% if recs %}
+                        {% for rec in recs[:12] %}
+                        <a href="/anime/{{ rec.id }}" class="rec-card">
+                            <div class="rec-poster">
+                                <img src="{{ rec.image }}" alt="{{ rec.title }}" loading="lazy">
+                                <div class="rec-overlay">
+                                    <div class="rec-stats">
+                                        <span class="rec-type">{{ rec.type or 'TV' }}</span>
+                                        <span class="rec-eps">{{ rec.episodes or '?' }} ep</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <h3 class="rec-title">{{ rec.title }}</h3>
+                        </a>
+                        {% endfor %}
+                    {% else %}
+                        <p style="color: #666;">No recommendations available.</p>
+                    {% endif %}
+                </div>
             </div>
         </div>
-        {% endif %}
+
+        <!-- 6. Popular Sidebar -->
+        <div class="sidebar">
+            <h2 class="section-title">Most Popular</h2>
+            <div class="popular-list">
+                {% if most_popular %}
+                    {% set pop_list = most_popular.results if most_popular.results is defined else most_popular %}
+                    {% for item in pop_list[:10] %}
+                    <a href="/anime/{{ item.id }}" class="popular-item">
+                        <div class="pop-rank {% if loop.index <= 3 %}top-3{% endif %}">{{ loop.index }}</div>
+                        <img src="{{ item.image }}" alt="{{ item.title }}" class="pop-img">
+                        <div class="pop-details">
+                            <h4 class="pop-title">{{ item.title }}</h4>
+                            <div class="pop-meta">
+                                <span class="pop-eye"><i class="fa-regular fa-eye"></i> {{ item.view_count or '12K' }}</span>
+                                <span class="pop-type">{{ item.type or 'TV' }}</span>
+                            </div>
+                        </div>
+                    </a>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
     </div>
 {% endblock %}
