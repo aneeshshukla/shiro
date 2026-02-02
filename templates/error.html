@@ -10,5 +10,12 @@
         <a href="/" style="padding: 1rem 2rem; background: #667eea; color: #fff; text-decoration: none; border-radius: 8px;">
             Go Home
         </a>
+        {% if alt_link %}
+        <br>
+        <br>
+            <a href="{{ alt_link }}" style="padding: 1rem 2rem; color: #fff; text-decoration: none; border-radius: 8px;">
+                Watch on AnimeKai
+            </a>
+        {% endif %}
     </div>
 {% endblock %}

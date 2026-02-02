@@ -391,3 +391,90 @@
     .info-actions { justify-content: center; }
     .info-badges { justify-content: center; }
 }
+
+/* Related Animes Block */
+.related-block {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.related-header {
+    display: block;
+    font-size: 0.9rem;
+    color: #888;
+    font-weight: 700;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+.related-list {
+    display: flex;
+    overflow-x: auto;
+    gap: 10px;
+    padding-bottom: 5px; /* Space for scrollbar if needed */
+}
+
+/* Scrollbar specific for this list if needed, or rely on global */
+.related-list::-webkit-scrollbar {
+    height: 6px;
+}
+.related-list::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.2);
+    border-radius: 3px;
+}
+
+.related-card {
+    flex: 0 0 100px; /* Fixed width */
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    background: rgba(0,0,0,0.2);
+    border-radius: 6px;
+    overflow: hidden;
+    transition: transform 0.2s, background 0.2s;
+}
+
+.related-card:hover {
+    transform: translateY(-3px);
+    background: rgba(255,255,255,0.1);
+}
+
+.related-card img {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+}
+
+.related-info {
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.related-type {
+    font-size: 0.7rem;
+    background: var(--primary);
+    color: #fff;
+    padding: 2px 4px;
+    border-radius: 3px;
+    align-self: flex-start;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.related-title {
+    font-size: 0.8rem;
+    color: #ddd;
+    line-height: 1.2;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-weight: 500;
+}

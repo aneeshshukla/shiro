@@ -85,7 +85,7 @@ def watch(episode_id):
         if not api_response or not api_response.get("ok") or api_response.get("count") == 0:
              # If stream fails, we might still want to show the page but with an error message
              # But original logic returned 503.
-            return render_template('error.html', message="Streaming service unavailable"), 503
+            return render_template('error.html', message="Streaming service unavailable", alt_link="https://anikai.to/watch/" + episode_id + "#ep=" + ep), 503
 
         # We need anime info for the breadcrumbs/details on the watch page
         anime_details = anime_client.get_info(episode_id)

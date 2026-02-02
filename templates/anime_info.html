@@ -42,8 +42,8 @@
                 <div class="info-badges">
                     <span class="badge-rating">{{ anime.rating or 'PG-13' }}</span>
                     <span class="badge-quality">{{ anime.quality or 'HD' }}</span>
-                    <span class="badge-sub"><i class="fa-solid fa-closed-captioning"></i> {{ anime.sub or '?' }}</span>
-                    {% if anime.dub %}<span class="badge-dub"><i class="fa-solid fa-microphone"></i> {{ anime.dub }}</span>{% endif %}
+                    <span class="badge-sub"><i class="fa-solid fa-closed-captioning"></i> {{ anime.totalEpisodes or '?' }}</span>
+                    {% if anime.hasDub %}<span class="badge-dub"><i class="fa-solid fa-microphone"></i> {{ anime.totalEpisodes }}</span>{% endif %}
                     <span class="badge-type">{{ anime.type or 'TV' }}</span>
                     <span class="badge-duration">{{ anime.duration or '24m' }}</span>
                 </div>
@@ -65,6 +65,24 @@
                 <div class="info-synopsis">
                     <p>{{ anime.description }}</p>
                 </div>
+
+                <!-- Related Animes -->
+                {% if anime.relations and anime.relations|length > 0 %}
+                <div class="related-block">
+                    <span class="related-header">Related:</span>
+                    <div class="related-list">
+                        {% for rel in anime.relations %}
+                        <a href="/anime/{{ rel.id }}" class="related-card" title="{{ rel.title }} ({{ rel.relationType }})">
+                            <img src="{{ rel.image }}" alt="{{ rel.title }}">
+                            <div class="related-info">
+                                <span class="related-type">{{ rel.relationType }}</span>
+                                <span class="related-title">{{ rel.title }}</span>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
 
                 <!-- <div class="share-block">
                     <span>Share Anime:</span>
@@ -179,11 +197,11 @@
                     {% for item in pop_list[:10] %}
                     <a href="/anime/{{ item.id }}" class="popular-item">
                         <div class="pop-rank {% if loop.index <= 3 %}top-3{% endif %}">{{ loop.index }}</div>
-                        <img src="{{ item.image }}" alt="{{ item.title }}" class="pop-img">
+                        <img src="{{ item.banner }}" alt="{{ item.title }}" class="pop-img">
                         <div class="pop-details">
                             <h4 class="pop-title">{{ item.title }}</h4>
                             <div class="pop-meta">
-                                <span class="pop-eye"><i class="fa-regular fa-eye"></i> {{ item.view_count or '12K' }}</span>
+                                <!-- <span class="pop-eye"><i class="fa-regular fa-eye"></i> {{ item.view_count or '12K' }}</span> -->
                                 <span class="pop-type">{{ item.type or 'TV' }}</span>
                             </div>
                         </div>
