@@ -1,6 +1,8 @@
 import os
 import psycopg2
 from psycopg2.extras import RealDictCursor
+from psycopg2.pool import SimpleConnectionPool
+from contextlib import contextmanager
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -8,11 +10,23 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 
 class UserManager:
     def __init__(self):
-        self.conn = psycopg2.connect(DATABASE_URL)
-        self.conn.autocommit = True
+        # Create a connection pool
+        # minconn=1, maxconn=10 (adjust as needed)
+        self.pool = SimpleConnectionPool(
+            minconn=1, 
+            maxconn=10, 
+            dsn=DATABASE_URL
+        )
 
+    @contextmanager
     def get_cursor(self):
-        return self.conn.cursor(cursor_factory=RealDictCursor)
+        conn = self.pool.getconn()
+        conn.autocommit = True
+        try:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                yield cur
+        finally:
+            self.pool.putconn(conn)
 
     def sync_oauth_user(self, provider, provider_id, display_name, username, email, avatar):
         """
@@ -60,6 +74,6 @@ class UserManager:
             cur.execute(sql, (uid,))
             return cur.fetchone()
 
-    def __del__(self):
-        if hasattr(self, 'conn') and self.conn:
-            self.conn.close()
+    def close(self):
+        if hasattr(self, 'pool') and self.pool:
+            self.pool.closeall()
