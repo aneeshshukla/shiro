@@ -153,7 +153,8 @@
         <button class="nav-action-btn" title="Community">
           <i class="fa-solid fa-comments"></i>
         </button>
-        {% if user %}
+        {% if session.get('user') %}
+        {% set user = session.get('user') %}
         <div
           class="user-menu"
           style="position: relative; display: inline-block"
@@ -177,7 +178,7 @@
                 height: 35px;
                 border-radius: 50%;
                 object-fit: cover;
-                border: 2px solid #7289da;
+                border: 2px solid #a3c539;
               "
               onerror="
                 this.src = 'https://cdn.discordapp.com/embed/avatars/0.png'

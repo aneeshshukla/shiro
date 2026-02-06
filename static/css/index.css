@@ -616,3 +616,17 @@ body {
     color: #666;
     white-space: nowrap;
 }
+
+/* --- Slider Controls (refactored) --- */
+.slide-controls {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.6s ease-in-out, visibility 0.6s;
+    pointer-events: none;
+}
+
+.slide-controls.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}

@@ -35,7 +35,6 @@ def index():
     upcoming = anime_client.get_top_upcoming()
     latest_completed = anime_client.get_latest_completed()
     schedule = anime_client.get_schedule()
-    user = session.get('user', None)
     # Ensure allow iteration even if empty
     return render_template('index.html', 
                          spotlight=spotlight,
@@ -43,27 +42,24 @@ def index():
                          new_releases=new_releases,
                          upcoming=upcoming,
                          latest_completed=latest_completed,
-                         schedule=schedule,
-                         user=user)
+                         schedule=schedule)
 
 # Search anime
 @app.route('/search')
 def search():
     query = request.args.get('q', '')
     page = request.args.get('page', 1, type=int)
-    user = session.get('user', None)
     if not query:
         # Fallback to specials if no query, preserving original logic
         results = anime_client.fetch('specials', {"page": page})
-        return render_template('search.html', page=page, query='', results=results, user=user)
+        return render_template('search.html', page=page, query='', results=results)
     
     results = anime_client.search(query, page)
     
     return render_template('search.html', 
                          results=results, 
                          query=query,
-                         page=page,
-                         user=user)
+                         page=page)
 
 # Get search suggestions (AJAX)
 @app.route('/api/suggestions')
@@ -81,12 +77,11 @@ def anime_info(anime_id):
     info = anime_client.get_info(anime_id)
     
     if not info:
-        return render_template('error.html', message="Anime not found",user=user), 404
+        return render_template('error.html', message="Anime not found"), 404
     
     # Fetch popular data for the sidebar
-    most_popular = anime_client.get_spotlight()
-    user = session.get('user', None)    
-    return render_template('anime_info.html', anime=info, most_popular=most_popular, user=user)
+    most_popular = anime_client.get_spotlight()    
+    return render_template('anime_info.html', anime=info, most_popular=most_popular)
 
 # Watch episode
 @app.route('/watch/<episode_id>')
@@ -94,7 +89,6 @@ def watch(episode_id):
     ep = request.args.get('ep', '1')
     dub = request.args.get('dub', 'false').lower() == 'true'
     category = "dub" if dub else "sub"
-    user = session.get('user', None)
     try:
         # Call Stream Client
         api_response = stream_client.get_stream_data(episode_id, category, ep)
@@ -114,17 +108,15 @@ def watch(episode_id):
             is_dub=dub,
             episode_id=episode_id,
             anime_info=anime_details if anime_details else {},
-            user=user
         )
 
     except Exception as e:
         print(f"Flask Error in watch: {e}")
-        return render_template('error.html', message="Internal Server Error", user=user), 500
+        return render_template('error.html', message="Internal Server Error"), 500
 
 # Browse by category
 @app.route('/browse/<category>')
 def browse(category):
-    user = session.get('user', None)
     page = request.args.get('page', 1, type=int)
     
     valid_categories = ['movies', 'tv', 'ova', 'ona', 'specials', 
@@ -132,19 +124,17 @@ def browse(category):
                        'latest-completed']
     
     if category not in valid_categories:
-        return render_template('error.html', message="Invalid category", user=user), 404
+        return render_template('error.html', message="Invalid category"), 404
     
     data = anime_client.get_by_category(category, page)
     return render_template('browse.html', 
                          data=data,
                          category=category,
-                         page=page,
-                         user=user)
+                         page=page)
 
 # Browse by genre
 @app.route('/genre/<genre_name>')
 def browse_genre(genre_name):
-    user = session.get('user', None)
     page = request.args.get('page', 1, type=int)
     
     data = anime_client.get_by_genre(genre_name, page)
@@ -152,8 +142,7 @@ def browse_genre(genre_name):
                          data=data,
                          category=genre_name, # Reusing category for title display
                          page=page,
-                         is_genre=True,
-                         user=user)
+                         is_genre=True)
 
 # API endpoint for dynamic loading
 @app.route('/api/anime/<anime_id>')
@@ -179,15 +168,13 @@ def api_watch(episode_id):
 
 @app.route('/profile')
 def profile():
-    user = session.get('user', None)
-    if not user:
+    if not session.get('user', None):
         return redirect(url_for('login'))
-    return render_template('profile.html', user=user)
+    return render_template('profile.html')
 
 @app.route('/login')
 def login():
-    user = session.get('user', None)
-    if not user:
+    if not session.get('user', None):
         scope = 'identify email'
         discord_login_url = f"{AUTHORIZATION_BASE_URL}?response_type=code&client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&scope={scope}"
         return redirect(discord_login_url)
@@ -248,13 +235,11 @@ def logout():
 # Error handlers
 @app.errorhandler(404)
 def not_found(e):
-    user = session.get('user', None)
-    return render_template('error.html', message="Page not found", user=user), 404
+    return render_template('error.html', message="Page not found"), 404
 
 @app.errorhandler(500)
 def internal_error(e):  
-    user = session.get('user', None)
-    return render_template('error.html', message="Internal server error", user=user), 500
+    return render_template('error.html', message="Internal server error"), 500
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
