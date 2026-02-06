@@ -1,8 +1,8 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link
       rel="shortcut icon"
       href="{{ url_for('static', filename='favicon.png') }}"
@@ -10,11 +10,14 @@
     />
     <title>{% block title %}ShiRo{% endblock %}</title>
     {% block head %}{% endblock %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/base.css') }}"
+    />
     {% block extra_css %}{% endblock %}
 
     <!-- 🔹 Search Autocomplete CSS -->
-     <!-- <style>
+    <!-- <style>
       .material-symbols-outlined {
           font-variation-settings:
           'FILL' 0,
@@ -88,122 +91,206 @@
         font-weight: 600;
       }
 
-      .badge-cc { background: #c0392b; }
-      .badge-ep { background: #27ae60; }
-      .badge-type { background: #2c3e50; }
-      .badge-year { background: #34495e; }
-      .badge-rating { background: #e67e22; }
+      .badge-cc {
+        background: #c0392b;
+      }
+      .badge-ep {
+        background: #27ae60;
+      }
+      .badge-type {
+        background: #2c3e50;
+      }
+      .badge-year {
+        background: #34495e;
+      }
+      .badge-rating {
+        background: #e67e22;
+      }
     </style>
-</head>
+  </head>
 
-<body>
+  <body>
     <nav class="navbar" id="navbar">
-        <div class="navbar-left">
-            <button class="mobile-menu-btn" id="mobile-menu-btn">
-                <i class="fa-solid fa-bars"></i>
+      <div class="navbar-left">
+        <button class="mobile-menu-btn" id="mobile-menu-btn">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+        <a href="/" class="logo"> SHI<span class="kai">RO</span> </a>
+        <!-- Optional: Desktop links could go here if we want them next to logo -->
+      </div>
+
+      <div class="navbar-center">
+        <!-- 🔍 Centered Search -->
+        <div class="search-container">
+          <div class="search-wrapper">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <form action="/search" method="get" style="width: 100%">
+              <input
+                id="anime-search"
+                type="text"
+                name="q"
+                placeholder="Search anime..."
+                autocomplete="off"
+                value="{{ request.args.get('q', '') }}"
+              />
+            </form>
+            <button class="filter-btn">
+              <i class="fa-solid fa-filter"></i> FILTER
             </button>
-            <a href="/" class="logo">
-                SHI<span class="kai">RO</span>
-            </a>
-            <!-- Optional: Desktop links could go here if we want them next to logo -->
+            <div id="search-results" class="search-dropdown"></div>
+          </div>
         </div>
+      </div>
 
-        <div class="navbar-center">
-            <!-- 🔍 Centered Search -->
-            <div class="search-container">
-                <div class="search-wrapper">
-                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                    <form action="/search" method="get" style="width: 100%;">
-                        <input
-                          id="anime-search"
-                          type="text"
-                          name="q"
-                          placeholder="Search anime..."
-                          autocomplete="off"
-                          value="{{ request.args.get('q', '') }}">
-                    </form>
-                    <button class="filter-btn"><i class="fa-solid fa-filter"></i> FILTER</button>
-                    <div id="search-results" class="search-dropdown"></div>
-                </div>
-            </div>
+      <div class="navbar-right">
+        <!-- Action Icons -->
+        <button class="nav-action-btn" title="Random Anime">
+          <i class="fa-solid fa-shuffle"></i>
+        </button>
+        <button class="nav-action-btn" title="Light/Dark">
+          <i class="fa-solid fa-moon"></i>
+        </button>
+        <button class="nav-action-btn" title="Community">
+          <i class="fa-solid fa-comments"></i>
+        </button>
+        {% if user %}
+        <div
+          class="user-menu"
+          style="position: relative; display: inline-block"
+        >
+          <a
+            href="/profile"
+            class="profile-link"
+            style="
+              display: flex;
+              align-items: center;
+              gap: 8px;
+              text-decoration: none;
+              color: inherit;
+            "
+          >
+            <img
+              src="https://cdn.discordapp.com/avatars/{{ user.id }}/{{ user.avatar }}.png"
+              alt="Profile"
+              style="
+                width: 35px;
+                height: 35px;
+                border-radius: 50%;
+                object-fit: cover;
+                border: 2px solid #7289da;
+              "
+              onerror="
+                this.src = 'https://cdn.discordapp.com/embed/avatars/0.png'
+              "
+            />
+          </a>
         </div>
+        {% else %}
+        <a href="/login" class="login-btn">Login</a>
+        {% endif %}
+      </div>
 
-        <div class="navbar-right">
-            <!-- Action Icons -->
-            <button class="nav-action-btn" title="Random Anime"><i class="fa-solid fa-shuffle"></i></button>
-            <button class="nav-action-btn" title="Light/Dark"><i class="fa-solid fa-moon"></i></button>
-            <button class="nav-action-btn" title="Community"><i class="fa-solid fa-comments"></i></button>
-            <a href="/login" class="login-btn">Login</a>
-        </div>
-        
-        <!-- Mobile Links Hidden Structure -->
-        <ul class="nav-links" id="nav-links">
-            <li><a href="/">Home</a></li>
-            <li><a href="/browse/movies">Movies</a></li>
-            <li><a href="/browse/tv">TV Series</a></li>
-            <li><a href="/browse/new-releases">New Releases</a></li>
-        </ul>
+      <!-- Mobile Links Hidden Structure -->
+      <ul class="nav-links" id="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/browse/movies">Movies</a></li>
+        <li><a href="/browse/tv">TV Series</a></li>
+        <li><a href="/browse/new-releases">New Releases</a></li>
+      </ul>
     </nav>
 
     <div id="spacer"></div>
 
-    {% block content %}{% endblock %}
-    {% block extra_js %}{% endblock %}
+    {% block content %}{% endblock %} {% block extra_js %}{% endblock %}
 
     <!-- Footer -->
     <footer id="footer">
-        <div class="az-list-section">
-            <div class="az-header">
-                <div class="az-left">
-                    <span class="az-title">A-Z List</span>
-                    <span class="az-desc">Searching anime order by alphabet name A to Z.</span>
-                </div>
-                <div class="footer-links-right">
-                    <a href="https://discord.gg/ExNewFKvZV" target="_blank">REQUEST</a>
-                    <a href="https://discord.gg/ExNewFKvZV" target="_blank">CONTACT US</a>
-                </div>
-            </div>
-            
-            <ul class="az-buttons">
-                <li><a href="/search?sort=az&q=all">All</a></li>
-                <li><a href="/search?sort=az&q=0-9">0-9</a></li>
-                {% for letter in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' %}
-                <li><a href="/search?sort=az&q={{ letter }}">{{ letter }}</a></li>
-                {% endfor %}
-            </ul>
+      <div class="az-list-section">
+        <div class="az-header">
+          <div class="az-left">
+            <span class="az-title">A-Z List</span>
+            <span class="az-desc"
+              >Searching anime order by alphabet name A to Z.</span
+            >
+          </div>
+          <div class="footer-links-right">
+            <a href="https://discord.gg/ExNewFKvZV" target="_blank">REQUEST</a>
+            <a href="https://discord.gg/ExNewFKvZV" target="_blank"
+              >CONTACT US</a
+            >
+          </div>
         </div>
 
-        <div class="footer-bottom">
-            <div class="footer-left">
-                <p>Copyright ©SHIRO. All Rights Reserved</p>
-                <p class="disclaimer">This site does not store any files on its server. All contents are provided by non-affiliated third parties.</p>
-                <div class="socials">
-                    <span style="color: #ccc;">Socials: </span>
-                    <a href="#"><i class="fa-brands fa-twitter"></i></a>
-                    <a href="https://discord.gg/ExNewFKvZV" target="_blank"><i class="fa-brands fa-discord"></i></a>
-                    <a href="#"><i class="fa-brands fa-reddit"></i></a>
-                </div>
-                <div class="footer-links-bottom">
-                    Links: <a href="https://shiro-to.vercel.app" target="_blank">shiro-to.vercel.app</a>
-                </div>
-            </div>
-            
-            <div class="footer-right">
-                <a href="/" class="logo" style="font-size: 2rem; margin-bottom: 10px; display: block;">
-                    SHI<span class="kai">RO</span>
-                </a>
-                <a href="https://github.com/aneeshshukla/shiro" target="_blank" class="github-btn" 
-                   style="background: #333; color: #fff; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 8px; transition: background 0.2s;">
-                    <i class="fa-brands fa-github"></i> See Project on GitHub
-                </a>
-            </div>
+        <ul class="az-buttons">
+          <li><a href="/search?sort=az&q=all">All</a></li>
+          <li><a href="/search?sort=az&q=0-9">0-9</a></li>
+          {% for letter in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' %}
+          <li><a href="/search?sort=az&q={{ letter }}">{{ letter }}</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <div class="footer-bottom">
+        <div class="footer-left">
+          <p>Copyright ©SHIRO. All Rights Reserved</p>
+          <p class="disclaimer">
+            This site does not store any files on its server. All contents are
+            provided by non-affiliated third parties.
+          </p>
+          <div class="socials">
+            <span style="color: #ccc">Socials: </span>
+            <a href="#"><i class="fa-brands fa-twitter"></i></a>
+            <a href="https://discord.gg/ExNewFKvZV" target="_blank"
+              ><i class="fa-brands fa-discord"></i
+            ></a>
+            <a href="#"><i class="fa-brands fa-reddit"></i></a>
+          </div>
+          <div class="footer-links-bottom">
+            Links:
+            <a href="https://shiro-to.vercel.app" target="_blank"
+              >shiro-to.vercel.app</a
+            >
+          </div>
         </div>
+
+        <div class="footer-right">
+          <a
+            href="/"
+            class="logo"
+            style="font-size: 2rem; margin-bottom: 10px; display: block"
+          >
+            SHI<span class="kai">RO</span>
+          </a>
+          <a
+            href="https://github.com/aneeshshukla/shiro"
+            target="_blank"
+            class="github-btn"
+            style="
+              background: #333;
+              color: #fff;
+              padding: 8px 16px;
+              border-radius: 6px;
+              text-decoration: none;
+              font-size: 0.9rem;
+              display: inline-flex;
+              align-items: center;
+              gap: 8px;
+              transition: background 0.2s;
+            "
+          >
+            <i class="fa-brands fa-github"></i> See Project on GitHub
+          </a>
+        </div>
+      </div>
     </footer>
 
     <!-- 🔹 Navbar Spacer -->
     <script src="{{ url_for('static', filename='js/base.js') }}"></script>
 
     <!-- 🔹 Search Autocomplete JS -->
-    <script src="https://kit.fontawesome.com/c8e74b97da.js" crossorigin="anonymous"></script>
-</body>
+    <script
+      src="https://kit.fontawesome.com/c8e74b97da.js"
+      crossorigin="anonymous"
+    ></script>
+  </body>
 </html>

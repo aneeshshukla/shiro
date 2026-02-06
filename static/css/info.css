@@ -387,9 +387,42 @@
     .content-container { flex-direction: column; }
     .sidebar { width: 100%; }
     .hero-grid { grid-template-columns: 1fr; text-align: center; }
-    .hero-poster { margin: 0 auto; width: 200px; }
+    .hero-poster { margin: 0 auto; width: 220px; aspect-ratio: 2/3; }
     .info-actions { justify-content: center; }
     .info-badges { justify-content: center; }
+    .hero-info { align-items: center; } /* Center align info text */
+    
+    .info-title { font-size: 2.2rem; text-align: center; }
+    .info-synopsis p { text-align: center; max-height: none; /* Expand on mobile usually better or keep max-height */ }
+
+    /* Reposition Meta if needed, but it's hidden in current 1200px query. 
+       Let's optionally show it below if important, or keep hidden/simplified */
+}
+
+@media (max-width: 600px) {
+    .hero-wrapper {
+        min-height: auto;
+        padding-top: 80px; /* Space for nav */
+    }
+    .hero-poster { width: 160px; }
+    .info-title { font-size: 1.8rem; }
+    .btn-watch-now {
+        font-size: 1rem;
+        padding: 10px 20px;
+    }
+    .btn-add-list {
+        font-size: 0.9rem;
+        padding: 10px 16px;
+    }
+    
+    .rec-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+    
+    /* Ensure related list scrolls well */
+    .related-card { flex: 0 0 90px; }
+    .related-card img { height: 120px; }
 }
 
 /* Related Animes Block */

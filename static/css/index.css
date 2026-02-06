@@ -385,6 +385,7 @@ body {
     }
     .hero-buttons {
         gap: 10px;
+        flex-wrap: wrap; /* Allow wrapping on small screens */
     }
     .hero-btn {
         padding: 10px 20px;
@@ -392,15 +393,34 @@ body {
     }
     
     .anime-grid { 
-        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); 
-        gap: 15px;
+        grid-template-columns: repeat(2, 1fr); /* Force 2 columns */
+        gap: 10px;
     }
+    /* For vary small screens, maybe 1 column or smaller cards. 
+       minmax(130px, 1fr) usually works for 2 cols on >300px phone. */
+    .anime-grid {
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    }
+
     .releases-grid { grid-template-columns: 1fr; }
     
     /* Responsive new sections */
-    .triple-list-grid { grid-template-columns: 1fr; }
+    .triple-list-grid { grid-template-columns: 1fr; gap: 40px; }
     .content-wrapper { flex-direction: column; }
     .sidebar { width: 100%; min-width: 0; }
+
+    /* Footer adjustments handled in base, but ensure spacing */
+    .main-content { padding-bottom: 2rem; }
+}
+
+@media (max-width: 480px) {
+    .anime-grid {
+        grid-template-columns: repeat(2, 1fr); /* Force 2 columns on mobile portrait */
+        gap: 8px;
+    }
+    .hero-title { font-size: 1.6rem; }
+    .anime-card-info .badge-sm { font-size: 0.65rem; padding: 1px 3px; }
+    .card-title { font-size: 0.85rem; }
 }
 
 /* --- New 3-Column List Section --- */

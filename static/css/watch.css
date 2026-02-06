@@ -353,14 +353,43 @@
 }
 
 @media (max-width: 600px) {
+    .watch-container { padding: 0 10px 20px; }
+    
     .video-wrapper {
         border-radius: 0; 
-        margin: 0 -20px; /* Full width on mobile */
-        width: calc(100% + 40px);
+        margin: 0 -10px; /* Full width on mobile relative to container padding */
+        width: calc(100% + 20px);
     }
+    
     .player-toolbar {
         flex-direction: column;
-        align-items: flex-start;
+        gap: 10px;
+        padding: 10px;
     }
+    
+    .server-list {
+        width: 100%;
+        justify-content: flex-start;
+        overflow-x: auto; /* Horizontal scroll servers if many */
+        flex-wrap: nowrap;
+        padding-bottom: 5px;
+    }
+    /* Scrollbar for server list */
+    .server-list::-webkit-scrollbar { height: 4px; }
+    .server-list::-webkit-scrollbar-thumb { background: #444; border-radius: 2px; }
+
     .control-list { width: 100%; justify-content: space-between; }
+    
+    .episode-nav-bar { gap: 10px; }
+    .nav-btn {
+        flex: 1;
+        justify-content: center;
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+    
+    .watch-info h1 { font-size: 1.4rem; }
+    .watch-info .description { font-size: 0.9rem; }
+    
+    .breadcrumb-container { display: none; /* Often too cluttered on mobile watch page, or simplify */ }
 }

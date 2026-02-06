@@ -1,9 +1,23 @@
-from flask import Flask, render_template, request, jsonify, redirect
-import os
+from flask import Flask, render_template, request, session, jsonify, redirect, url_for
+import os, requests
 from dotenv import load_dotenv
 from services import AnimeDataClient, StreamClient
+import database
+db = database.UserManager()
 
 load_dotenv()
+
+CLIENT_ID = os.getenv('CLIENT_ID')
+CLIENT_SECRET = os.getenv('CLIENT_SECRET')
+REDIRECT_URI = os.getenv('DISCORD_REDIRECT_URI')
+AUTHORIZATION_BASE_URL = 'https://discord.com/api/oauth2/authorize'
+TOKEN_URL = 'https://discord.com/api/oauth2/token'
+USER_INFO_URL = 'https://discord.com/api/users/@me'
+OS_ENV = os.environ.get("OAUTHLIB_INSECURE_TRANSPORT")
+
+# Allow HTTP for local testing
+if OS_ENV is None:
+    os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
@@ -21,7 +35,7 @@ def index():
     upcoming = anime_client.get_top_upcoming()
     latest_completed = anime_client.get_latest_completed()
     schedule = anime_client.get_schedule()
-
+    user = session.get('user', None)
     # Ensure allow iteration even if empty
     return render_template('index.html', 
                          spotlight=spotlight,
@@ -29,24 +43,27 @@ def index():
                          new_releases=new_releases,
                          upcoming=upcoming,
                          latest_completed=latest_completed,
-                         schedule=schedule)
+                         schedule=schedule,
+                         user=user)
 
 # Search anime
 @app.route('/search')
 def search():
     query = request.args.get('q', '')
     page = request.args.get('page', 1, type=int)
-    
+    user = session.get('user', None)
     if not query:
         # Fallback to specials if no query, preserving original logic
         results = anime_client.fetch('specials', {"page": page})
-        return render_template('search.html', page=page, query='', results=results)
+        return render_template('search.html', page=page, query='', results=results, user=user)
     
     results = anime_client.search(query, page)
+    
     return render_template('search.html', 
                          results=results, 
                          query=query,
-                         page=page)
+                         page=page,
+                         user=user)
 
 # Get search suggestions (AJAX)
 @app.route('/api/suggestions')
@@ -64,12 +81,12 @@ def anime_info(anime_id):
     info = anime_client.get_info(anime_id)
     
     if not info:
-        return render_template('error.html', message="Anime not found"), 404
+        return render_template('error.html', message="Anime not found",user=user), 404
     
     # Fetch popular data for the sidebar
     most_popular = anime_client.get_spotlight()
-        
-    return render_template('anime_info.html', anime=info, most_popular=most_popular)
+    user = session.get('user', None)    
+    return render_template('anime_info.html', anime=info, most_popular=most_popular, user=user)
 
 # Watch episode
 @app.route('/watch/<episode_id>')
@@ -77,7 +94,7 @@ def watch(episode_id):
     ep = request.args.get('ep', '1')
     dub = request.args.get('dub', 'false').lower() == 'true'
     category = "dub" if dub else "sub"
-    
+    user = session.get('user', None)
     try:
         # Call Stream Client
         api_response = stream_client.get_stream_data(episode_id, category, ep)
@@ -96,16 +113,18 @@ def watch(episode_id):
             current_episode=ep,
             is_dub=dub,
             episode_id=episode_id,
-            anime_info=anime_details if anime_details else {}
+            anime_info=anime_details if anime_details else {},
+            user=user
         )
 
     except Exception as e:
         print(f"Flask Error in watch: {e}")
-        return render_template('error.html', message="Internal Server Error"), 500
+        return render_template('error.html', message="Internal Server Error", user=user), 500
 
 # Browse by category
 @app.route('/browse/<category>')
 def browse(category):
+    user = session.get('user', None)
     page = request.args.get('page', 1, type=int)
     
     valid_categories = ['movies', 'tv', 'ova', 'ona', 'specials', 
@@ -113,17 +132,19 @@ def browse(category):
                        'latest-completed']
     
     if category not in valid_categories:
-        return render_template('error.html', message="Invalid category"), 404
+        return render_template('error.html', message="Invalid category", user=user), 404
     
     data = anime_client.get_by_category(category, page)
     return render_template('browse.html', 
                          data=data,
                          category=category,
-                         page=page)
+                         page=page,
+                         user=user)
 
 # Browse by genre
 @app.route('/genre/<genre_name>')
 def browse_genre(genre_name):
+    user = session.get('user', None)
     page = request.args.get('page', 1, type=int)
     
     data = anime_client.get_by_genre(genre_name, page)
@@ -131,7 +152,8 @@ def browse_genre(genre_name):
                          data=data,
                          category=genre_name, # Reusing category for title display
                          page=page,
-                         is_genre=True)
+                         is_genre=True,
+                         user=user)
 
 # API endpoint for dynamic loading
 @app.route('/api/anime/<anime_id>')
@@ -155,14 +177,84 @@ def api_watch(episode_id):
     streams = stream_client.get_stream_data(episode_id, category, request.args.get('ep', '1'))
     return jsonify(streams if streams else {})
 
+@app.route('/profile')
+def profile():
+    user = session.get('user', None)
+    if not user:
+        return redirect(url_for('login'))
+    return render_template('profile.html', user=user)
+
+@app.route('/login')
+def login():
+    user = session.get('user', None)
+    if not user:
+        scope = 'identify email'
+        discord_login_url = f"{AUTHORIZATION_BASE_URL}?response_type=code&client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&scope={scope}"
+        return redirect(discord_login_url)
+    return redirect(url_for('index'))
+    
+
+@app.route('/auth/discord/callback')
+def callback():
+    if 'error' in request.args:
+        return jsonify({'error': request.args['error']})
+
+    if 'code' in request.args:
+        code = request.args['code']
+        
+        # Exchange code for access token
+        data = {
+            'client_id': CLIENT_ID,
+            'client_secret': CLIENT_SECRET,
+            'grant_type': 'authorization_code',
+            'code': code,
+            'redirect_uri': REDIRECT_URI
+        }
+        headers = {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+        
+        response = requests.post(TOKEN_URL, data=data, headers=headers)
+        response.raise_for_status()
+        tokens = response.json()
+        access_token = tokens['access_token']
+
+        # Get user info
+        user_headers = {
+            'Authorization': f"Bearer {access_token}"
+        }
+        user_response = requests.get(USER_INFO_URL, headers=user_headers)
+        user_response.raise_for_status()
+        user_data = user_response.json()
+        # print(user_data)
+        db.sync_oauth_user(
+            provider="discord",
+            provider_id=user_data['id'],
+            display_name=user_data['global_name'],
+            username=user_data['username'],
+            email=user_data['email'],
+            avatar=user_data['avatar']
+        )
+        session['user'] = user_data
+        return redirect(url_for('index'))
+    
+    return 'Unknown Error', 400
+
+@app.route('/logout')
+def logout():
+    session.pop('user', None)
+    return redirect(url_for('index'))
+
 # Error handlers
 @app.errorhandler(404)
 def not_found(e):
-    return render_template('error.html', message="Page not found"), 404
+    user = session.get('user', None)
+    return render_template('error.html', message="Page not found", user=user), 404
 
 @app.errorhandler(500)
-def internal_error(e):
-    return render_template('error.html', message="Internal server error"), 500
+def internal_error(e):  
+    user = session.get('user', None)
+    return render_template('error.html', message="Internal server error", user=user), 500
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

@@ -78,7 +78,7 @@ shiro/
 
 ## License
 
-This project is open source and available under the [MIT License](/LICENSE).
+This project is open source and available under the [MIT License](LICENSE).
 
 ---
 *Note: This project is for educational purposes only. It scrapes data from third-party sources and does not host any content.*

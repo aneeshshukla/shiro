@@ -104,9 +104,12 @@ body {
 
 /* Nav Wrapper for Links */
 .nav-links {
-    display: none; /* Hidden by default in this layout, maybe move to sidebar or simple links */
+    list-style: none;
+    display: none; /* Hidden by default on desktop if not used, or move to header */
 }
-/* For Anikai, links often hidden or minor. Let's keep specific ones if needed */
+/* If we want desktop links, we'd add media query to show them. 
+   Assuming desktop uses sidebar or just top links if space permits.
+   For now, we just ensure mobile works. */
 
 /* Search */
 .search-container {
@@ -380,19 +383,22 @@ body {
 @media (max-width: 850px) {
     .mobile-menu-btn {
         display: block;
+        z-index: 1100; /* Above nav links */
+        position: relative;
     }
 
     .nav-links {
+        display: flex; /* Override display:none from desktop default if set, though base was none. We need flex for mobile */
         position: fixed;
         top: 0;
         left: -100%; /* Hidden left */
-        width: 250px;
+        width: 280px;
         height: 100vh;
         background: #0a0a0a;
         flex-direction: column;
         align-items: flex-start;
         padding: 5rem 2rem;
-        transition: 0.3s ease-in-out;
+        transition: left 0.3s ease-in-out;
         z-index: 1000;
         border-right: 1px solid #222;
         box-shadow: 5px 0 15px rgba(0,0,0,0.5);
@@ -401,23 +407,71 @@ body {
     .nav-links.active {
         left: 0;
     }
-    
-    .navbar {
-        padding: 0.8rem 5%;
-        background: #0a0a0a; /* Solid on mobile for readability */
-        position: fixed; /* Stick to top on mobile */
+
+    .nav-links li {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    .nav-links a {
+        font-size: 1.2rem;
+        color: #fff;
+        text-decoration: none;
+        display: block;
+        padding: 10px;
+        border-radius: 6px;
+        transition: background 0.2s;
+    }
+    .nav-links a:hover {
+        background: rgba(255,255,255,0.1);
+        color: var(--primary);
     }
     
-    .navbar-right {
-        gap: 10px;
+    .navbar {
+        padding: 0 1rem;
+        height: 60px;
+        background: #0a0a0a;
+    }
+    
+    .logo { font-size: 1.5rem; }
+    
+    .navbar-center {
+        justify-content: flex-end; /* Push search to right or hide */
+        margin-right: 10px;
     }
 
     .search-container {
-        width: 160px; /* Smaller search bar on mobile */
+        width: 40px; /* Icon only initially? Or small bar */
+        max-width: none;
+        transition: width 0.3s;
+    }
+    .search-container.active {
+        width: 200px;
     }
 
+    /* On very small screens, maybe hide text input until clicked, 
+       but for now let's keep a compact bar */
+    .search-container {
+        width: 140px; 
+    }
+    
     .search-container input {
         font-size: 13px;
-        padding: 0.5rem 0.8rem 0.5rem 2rem;
+        padding: 0.5rem 0.5rem 0.5rem 2rem;
+        background: #111;
     }
+    .filter-btn { display: none; } /* Hide filter text on mobile */
+
+    .navbar-right {
+        gap: 10px;
+    }
+    .nav-action-btn { font-size: 1rem; }
+    .login-btn { padding: 6px 12px; font-size: 0.8rem; }
+}
+
+@media (max-width: 480px) {
+    .search-container { width: 120px; }
+    .logo span.kai { display: none; } /* Hide 'RO' or keep it? Let's keep it but maybe smaller text */
+    .logo { font-size: 1.4rem; } 
+    .navbar-left { gap: 10rem; }
 }
