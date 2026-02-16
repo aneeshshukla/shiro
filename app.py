@@ -180,50 +180,52 @@ def login():
         return redirect(discord_login_url)
     return redirect(url_for('index'))
     
+
 @app.route('/auth/discord/callback')
 def callback():
-    code = request.args.get("code")
-    if not code:
-        return "Missing code", 400
+    if 'error' in request.args:
+        return jsonify({'error': request.args['error']})
 
-    token_res = requests.post(
-        TOKEN_URL,
-        data={
-            "client_id": CLIENT_ID,
-            "client_secret": CLIENT_SECRET,
-            "grant_type": "authorization_code",
-            "code": code,
-            "redirect_uri": REDIRECT_URI,
-        },
-        headers={"Content-Type": "application/x-www-form-urlencoded"},
-    )
+    if 'code' in request.args:
+        code = request.args['code']
+        
+        # Exchange code for access token
+        data = {
+            'client_id': CLIENT_ID,
+            'client_secret': CLIENT_SECRET,
+            'grant_type': 'authorization_code',
+            'code': code,
+            'redirect_uri': REDIRECT_URI
+        }
+        headers = {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+        
+        response = requests.post(TOKEN_URL, data=data, headers=headers)
+        response.raise_for_status()
+        tokens = response.json()
+        access_token = tokens['access_token']
 
-    access_token = token_res.json()["access_token"]
-
-    user_data = requests.get(
-        USER_INFO_URL,
-        headers={"Authorization": f"Bearer {access_token}"}
-    ).json()
-
-    try:
+        # Get user info
+        user_headers = {
+            'Authorization': f"Bearer {access_token}"
+        }
+        user_response = requests.get(USER_INFO_URL, headers=user_headers)
+        user_response.raise_for_status()
+        user_data = user_response.json()
+        # print(user_data)
         db.sync_oauth_user(
             provider="discord",
-            provider_id=user_data["id"],
-            display_name=user_data.get("global_name") or user_data["username"],
-            username=user_data["username"],
-            email=user_data.get("email"),
-            avatar=user_data.get("avatar"),
+            provider_id=user_data['id'],
+            display_name=user_data['global_name'],
+            username=user_data['username'],
+            email=user_data['email'],
+            avatar=user_data['avatar']
         )
-    except Exception as e:
-        print("DB ERROR:", e)
-
-    session["user"] = {
-        "id": user_data["id"],
-        "username": user_data["username"],
-        "name": user_data.get("global_name"),
-    }
-
-    return redirect(url_for("index"))
+        session['user'] = user_data
+        return redirect(url_for('index'))
+    
+    return 'Unknown Error', 400
 
 @app.route('/logout')
 def logout():
