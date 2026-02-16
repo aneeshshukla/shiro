@@ -238,11 +238,11 @@ def logout():
     session.pop('user', None)
     return redirect(url_for('index'))
 
-@app.route('/terms')
+@app.route('/terms-of-service')
 def terms():
     return render_template('terms.html')
 
-@app.route('/privacy')
+@app.route('/privacy-policy')
 def privacy():
     return render_template('privacy.html')
 
