@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Terms of Service - Shiro{% endblock %}
+
+{% block extra_css %}
+<style>
+    .legal-container {
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 40px;
+        background: rgba(20, 26, 34, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        color: #ccd6f6;
+    }
+    
+    .legal-container h1 {
+        font-size: 2.5rem;
+        margin-bottom: 20px;
+        color: #fff;
+        border-bottom: 2px solid #a3c539;
+        display: inline-block;
+        padding-bottom: 10px;
+    }
+
+    .legal-container h2 {
+        font-size: 1.5rem;
+        margin-top: 30px;
+        margin-bottom: 15px;
+        color: #e6f1ff;
+    }
+
+    .legal-container p {
+        line-height: 1.6;
+        margin-bottom: 15px;
+        color: #8892b0;
+    }
+
+    .legal-container ul {
+        margin-left: 20px;
+        margin-bottom: 15px;
+        color: #8892b0;
+    }
+    
+    .legal-container li {
+        margin-bottom: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="legal-container">
+    <h1>Terms of Service</h1>
+    <p>Last updated: February 16, 2026</p>
+
+    <h2>1. Acceptance of Terms</h2>
+    <p>By accessing and using Shiro, you accept and agree to be bound by the terms and provision of this agreement.</p>
+
+    <h2>2. Description of Service</h2>
+    <p>Shiro is a platform that provides an interface for streaming anime content. We do not host any content on our servers. All content is provided by non-affiliated third parties.</p>
+
+    <h2>3. User Conduct</h2>
+    <p>You agree to use the service only for lawful purposes. You are prohibited from violating or attempting to violate the security of the website.</p>
+
+    <h2>4. Intellectual Property</h2>
+    <p>The Shiro design, logo, and custom graphics are owned by Shiro. All anime content, characters, and associated imagery are property of their respective owners.</p>
+
+    <h2>5. Disclaimer</h2>
+    <p>The materials on Shiro's website are provided on an 'as is' basis. Shiro makes no warranties, expressed or implied, and hereby disclaims and negates all other warranties including, without limitation, implied warranties or conditions of merchantability, fitness for a particular purpose, or non-infringement of intellectual property or other violation of rights.</p>
+
+    <h2>6. Changes to Terms</h2>
+    <p>We reserve the right to modify these terms at any time. You should check this page regularly. Your continued use of the Website following any changes to this Agreement constitutes your acceptance of the changes.</p>
+</div>
+{% endblock %}

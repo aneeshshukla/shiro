@@ -7,17 +7,20 @@ Shiro is a modern, responsive web application for streaming anime, built with Fl
 ## Features
 
 - **📺 Modern UI/UX**: Fully responsive "SHIRO" dark theme with glassmorphism effects and smooth animations.
-- **📅 Interactive Schedule**: Real-time weekly schedule widget with date navigation.
+- **� Discord OAuth**: Secure user authentication via Discord to save progress and access personalized features.
+- **👤 User Profiles**: Dedicated user profiles to manage settings and view watch history.
+- **�📅 Interactive Schedule**: Real-time weekly schedule widget with date navigation.
 - **🔎 Advanced Search**: Instant search suggestions and genre filtering.
 - **⏯️ Immersive Player**: Cinematic watch page with "Focus Mode," auto-play controls, and server selection.
 - **📱 Mobile Optimized**: Mobile-first design for browsing and watching on the go.
-- **⚡ High Performance**: Efficient caching strategy using `cachetools` for fast load times.
+- **⚡ High Performance**: Efficient caching strategy using `cachetools` and robust database connection pooling with `psycopg2`.
 
 ## Tech Stack
 
 - **Backend**: Python, Flask, Gunicorn
+- **Database**: PostgreSQL (Neon DB)
 - **Frontend**: HTML5, CSS3, JavaScript (No frameworks, pure performance)
-- **Utilities**: `python-dotenv` for config, `requests` for API handling
+- **Utilities**: `python-dotenv` for config, `requests` for API handling, `cachetools` for caching, `psycopg2` for DB connectivity.
 - **Comparison**: Built as a lightweight alternative to heavy SPA frameworks.
 
 ## Installation
@@ -46,8 +49,20 @@ Shiro is a modern, responsive web application for streaming anime, built with Fl
 4. **Configuration**
    Create a `.env` file in the root directory:
    ```env
+   # Flask Config
    SECRET_KEY=your_secret_key_here
+   
+   # Data & Streaming APIs
    BASE_URL=https://api.consumet.org/anime/<service-provider>
+   STREAM_URL=https://<streaming-api-url>
+
+   # Database (PostgreSQL/Neon)
+   DATABASE_URL=postgresql://user:password@host/dbname?sslmode=require
+
+   # Discord OAuth
+   CLIENT_ID=your_discord_client_id
+   CLIENT_SECRET=your_discord_client_secret
+   DISCORD_REDIRECT_URI=http://localhost:5000/auth/discord/callback
    ```
 
 5. **Run the application**
@@ -67,6 +82,7 @@ The project includes a `vercel.json` configuration for easy deployment to Vercel
 ```
 shiro/
 ├── app.py              # Main Flask application entry point
+├── database.py         # Database connection and user management
 ├── services.py         # API Client and Caching logic
 ├── requirements.txt    # Python dependencies
 ├── static/             # CSS, JS, and Images

@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Privacy Policy - Shiro{% endblock %}
+
+{% block extra_css %}
+<style>
+    .legal-container {
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 40px;
+        background: rgba(20, 26, 34, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        color: #ccd6f6;
+    }
+    
+    .legal-container h1 {
+        font-size: 2.5rem;
+        margin-bottom: 20px;
+        color: #fff;
+        border-bottom: 2px solid #a3c539;
+        display: inline-block;
+        padding-bottom: 10px;
+    }
+
+    .legal-container h2 {
+        font-size: 1.5rem;
+        margin-top: 30px;
+        margin-bottom: 15px;
+        color: #e6f1ff;
+    }
+
+    .legal-container p {
+        line-height: 1.6;
+        margin-bottom: 15px;
+        color: #8892b0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="legal-container">
+    <h1>Privacy Policy</h1>
+    <p>Last updated: February 16, 2026</p>
+
+    <h2>1. Information We Collect</h2>
+    <p>When you log in with Discord or Google, we collect basic profile information such as your username, avatar, and user ID to create your profile. We also store your watch history and preferences locally or in our database to enhance your experience.</p>
+
+    <h2>2. How We Use Your Information</h2>
+    <p>We use the information we collect to operate and maintain the service, provide customer support, and improve the functionality of the website. We do not sell your personal data to third parties.</p>
+
+    <h2>3. Cookies</h2>
+    <p>We use cookies to maintain your session and save your preferences. You can control the use of cookies at the individual browser level.</p>
+
+    <h2>4. Third-Party Links</h2>
+    <p>Our website contains links to other websites. We are not responsible for the privacy practices or the content of these other websites.</p>
+
+    <h2>5. Security</h2>
+    <p>We implement reasonable security measures to protect your information. However, no method of transmission over the Internet is 100% secure.</p>
+
+    <h2>6. Contact Us</h2>
+    <p>If you have any questions about this Privacy Policy, please contact us via our Discord server.</p>
+</div>
+{% endblock %}

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session, jsonify, redirect, url_for
+from flask import Flask, render_template, request, session, jsonify, redirect, url_for, Response
 import os, requests
 from dotenv import load_dotenv
 from services import AnimeDataClient, StreamClient
@@ -174,11 +174,17 @@ def profile():
 
 @app.route('/login')
 def login():
-    if not session.get('user', None):
-        scope = 'identify email'
-        discord_login_url = f"{AUTHORIZATION_BASE_URL}?response_type=code&client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&scope={scope}"
-        return redirect(discord_login_url)
-    return redirect(url_for('index'))
+    if session.get('user', None):
+        return redirect(url_for('index'))
+    return render_template('login.html')
+
+@app.route('/auth/discord')
+def auth_discord():
+    if session.get('user', None):
+        return redirect(url_for('index'))
+    scope = 'identify email'
+    discord_login_url = f"{AUTHORIZATION_BASE_URL}?response_type=code&client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&scope={scope}"
+    return redirect(discord_login_url)
     
 
 @app.route('/auth/discord/callback')
@@ -231,6 +237,21 @@ def callback():
 def logout():
     session.pop('user', None)
     return redirect(url_for('index'))
+
+@app.route('/terms')
+def terms():
+    return render_template('terms.html')
+
+@app.route('/privacy')
+def privacy():
+    return render_template('privacy.html')
+
+@app.route('/sitemap.xml')
+def sitemap():
+    from sitemap_generator import generate_sitemap_xml
+    base_url = request.url_root.rstrip('/')
+    xml_content = generate_sitemap_xml(base_url)
+    return Response(xml_content, mimetype='application/xml')
 
 # Error handlers
 @app.errorhandler(404)

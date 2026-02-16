@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Shiro{% endblock %}
+
+{% block extra_css %}
+<style>
+    .login-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 80vh;
+        padding: 20px;
+    }
+
+    .login-card {
+        background: rgba(20, 26, 34, 0.8);
+        -webkit-backdrop-filter: blur(16px);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 20px;
+        padding: 40px;
+        width: 100%;
+        max-width: 400px;
+        text-align: center;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .login-header {
+        margin-bottom: 30px;
+    }
+
+    .login-header h1 {
+        font-size: 2rem;
+        margin-bottom: 10px;
+        color: #fff;
+    }
+
+    .login-header p {
+        color: #8b9bb4;
+        font-size: 0.95rem;
+    }
+
+    .auth-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .auth-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        padding: 14px 20px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1rem;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border: 1px solid transparent;
+        cursor: pointer;
+    }
+
+    .btn-discord {
+        background: #5865F2;
+        color: white;
+    }
+
+    .btn-discord:hover {
+        background: #4752c4;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(88, 101, 242, 0.3);
+    }
+
+    .btn-google {
+        background: #ffffff;
+        color: #1a1a1a;
+        opacity: 0.6;
+        cursor: not-allowed;
+        position: relative;
+    }
+
+    .btn-google:hover::after {
+        content: "Coming Soon";
+        position: absolute;
+        top: -30px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0,0,0,0.8);
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    .terms {
+        margin-top: 30px;
+        font-size: 0.8rem;
+        color: #5d6d81;
+    }
+
+    .terms a {
+        color: #a3c539;
+        text-decoration: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <h1>Welcome Back</h1>
+            <p>Sign in to sync your watchlist and settings</p>
+        </div>
+
+        <div class="auth-buttons">
+            <a href="{{ url_for('auth_discord') }}" class="auth-btn btn-discord">
+                <i class="fa-brands fa-discord fa-lg"></i>
+                Continue with Discord
+            </a>
+            
+            <button class="auth-btn btn-google" disabled title="Coming Soon">
+                <i class="fa-brands fa-google fa-lg"></i>
+                Continue with Google
+            </button>
+        </div>
+
+        <div class="terms">
+            By continuing, you agree to our <a href="{{ url_for('terms') }}">Terms of Service</a> and <a href="{{ url_for('privacy') }}">Privacy Policy</a>.
+        </div>
+    </div>
+</div>
+{% endblock %}

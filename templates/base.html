@@ -3,7 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="google-site-verification" content="kqOTpKLidcr4MV5y4qscOEnl_fJbdo6YF_EFl4qUOkQ" />
+    <meta name="description" content="Watch anime online for free with Shiro" />
+    <meta name="keywords" content="anime, watch anime, free anime, Shiro" />
+    <meta name="author" content="Shiro" />
     <link
       rel="shortcut icon"
       href="{{ url_for('static', filename='favicon.png') }}"
@@ -27,6 +29,57 @@
           'opsz' 24
       }
     </style> -->
+    <style>
+      .cookie-banner {
+          position: fixed;
+          bottom: -100%;
+          left: 0;
+          width: 100%;
+          background: rgba(20, 26, 34, 0.95);
+          backdrop-filter: blur(10px);
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
+          padding: 20px;
+          z-index: 9999;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          gap: 20px;
+          transition: bottom 0.5s ease-in-out;
+          box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+      }
+
+      .cookie-banner.show {
+          bottom: 0;
+      }
+
+      .cookie-content {
+          color: #ccd6f6;
+          font-size: 0.95rem;
+          max-width: 600px;
+      }
+
+      .cookie-content a {
+          color: #a3c539;
+          text-decoration: none;
+      }
+
+      .cookie-btn {
+          background: #a3c539;
+          color: #141a22;
+          border: none;
+          padding: 10px 24px;
+          border-radius: 6px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+          white-space: nowrap;
+      }
+
+      .cookie-btn:hover {
+          background: #b5d64d;
+          transform: translateY(-2px);
+      }
+    </style>
     <style>
       .search-wrapper {
         position: relative;
@@ -286,7 +339,36 @@
       </div>
     </footer>
 
+    <!-- 🔹 Cookie Consent Banner -->
+    <div id="cookie-banner" class="cookie-banner">
+      <div class="cookie-content">
+        We use cookies and local storage to save your preferences and watch history. 
+        By continuing, you agree to our <a href="/privacy">Privacy Policy</a>.
+      </div>
+      <button id="accept-cookies" class="cookie-btn">Got it!</button>
+    </div>
+
     <!-- 🔹 Navbar Spacer -->
+    <script>
+      // Cookie Banner Logic
+      document.addEventListener('DOMContentLoaded', () => {
+          const banner = document.getElementById('cookie-banner');
+          const acceptBtn = document.getElementById('accept-cookies');
+          
+          // Check if user has already accepted
+          if (!localStorage.getItem('cookiesAccepted')) {
+              // Show banner after a short delay
+              setTimeout(() => {
+                  banner.classList.add('show');
+              }, 1000);
+          }
+
+          acceptBtn.addEventListener('click', () => {
+              localStorage.setItem('cookiesAccepted', 'true');
+              banner.classList.remove('show');
+          });
+      });
+    </script>
     <script src="{{ url_for('static', filename='js/base.js') }}"></script>
 
     <!-- 🔹 Search Autocomplete JS -->
@@ -296,4 +378,3 @@
     ></script>
   </body>
 </html>
-
