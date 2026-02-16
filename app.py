@@ -9,7 +9,7 @@ load_dotenv()
 
 CLIENT_ID = os.getenv('CLIENT_ID')
 CLIENT_SECRET = os.getenv('CLIENT_SECRET')
-REDIRECT_URI = os.getenv('DISCORD_REDIRECT_URI')
+BETA_REDIRECT_URI = os.getenv('DISCORD_BETA_REDIRECT_URI')
 AUTHORIZATION_BASE_URL = 'https://discord.com/api/oauth2/authorize'
 TOKEN_URL = 'https://discord.com/api/oauth2/token'
 USER_INFO_URL = 'https://discord.com/api/users/@me'
@@ -183,7 +183,7 @@ def auth_discord():
     if session.get('user', None):
         return redirect(url_for('index'))
     scope = 'identify email'
-    discord_login_url = f"{AUTHORIZATION_BASE_URL}?response_type=code&client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&scope={scope}"
+    discord_login_url = f"{AUTHORIZATION_BASE_URL}?response_type=code&client_id={CLIENT_ID}&BETA_REDIRECT_URI={BETA_REDIRECT_URI}&scope={scope}"
     return redirect(discord_login_url)
     
 
@@ -201,14 +201,22 @@ def callback():
             'client_secret': CLIENT_SECRET,
             'grant_type': 'authorization_code',
             'code': code,
-            'redirect_uri': REDIRECT_URI
+            'BETA_REDIRECT_URI': BETA_REDIRECT_URI
         }
         headers = {
             'Content-Type': 'application/x-www-form-urlencoded'
         }
         
         response = requests.post(TOKEN_URL, data=data, headers=headers)
-        response.raise_for_status()
+        if response.status_code != 200:
+            return jsonify({
+                "error": "Failed to get access token from Discord",
+                "status_code": response.status_code,
+                "discord_response": response.text,
+                "sent_BETA_REDIRECT_URI": BETA_REDIRECT_URI,
+                "sent_client_id": CLIENT_ID
+            }), 400
+        # response.raise_for_status() # Removed to prevent crash, handled above
         tokens = response.json()
         access_token = tokens['access_token']
 
