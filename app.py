@@ -183,7 +183,7 @@ def auth_discord():
     if session.get('user', None):
         return redirect(url_for('index'))
     scope = 'identify email'
-    discord_login_url = f"{AUTHORIZATION_BASE_URL}?response_type=code&client_id={CLIENT_ID}&BETA_REDIRECT_URI={BETA_REDIRECT_URI}&scope={scope}"
+    discord_login_url = f"{AUTHORIZATION_BASE_URL}?response_type=code&client_id={CLIENT_ID}&redirect_uri={BETA_REDIRECT_URI}&scope={scope}"
     return redirect(discord_login_url)
     
 
@@ -201,7 +201,7 @@ def callback():
             'client_secret': CLIENT_SECRET,
             'grant_type': 'authorization_code',
             'code': code,
-            'BETA_REDIRECT_URI': BETA_REDIRECT_URI
+            'redirect_uri': BETA_REDIRECT_URI
         }
         headers = {
             'Content-Type': 'application/x-www-form-urlencoded'
@@ -272,3 +272,4 @@ def internal_error(e):
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
+
