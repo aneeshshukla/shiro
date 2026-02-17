@@ -13,22 +13,13 @@
     />
     <title>{% block title %}ShiRo{% endblock %}</title>
     {% block head %}{% endblock %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/skeleton.css') }}?v=5">
+    {% block extra_css %}{% endblock %}
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='css/base.css') }}"
     />
-    {% block extra_css %}{% endblock %}
 
-    <!-- 🔹 Search Autocomplete CSS -->
-    <!-- <style>
-      .material-symbols-outlined {
-          font-variation-settings:
-          'FILL' 0,
-          'wght' 400,
-          'GRAD' 0,
-          'opsz' 24
-      }
-    </style> -->
     <style>
       .cookie-banner {
           position: fixed;

@@ -28,7 +28,9 @@
             <!-- 3.1 Poster Column -->
             <div class="hero-poster">
                 <div class="poster-card">
-                    <img src="{{ anime.image }}" alt="{{ anime.title }}">
+                    <div class="poster-wrapper skeleton">
+                        <img src="{{ anime.image }}" alt="{{ anime.title }}" loading="lazy" onload="this.parentElement.classList.add('loaded'); this.parentElement.classList.remove('skeleton');">
+                    </div>
                     <div class="w2g-overlay" title="Watch2gether">
                         <i class="fa-solid fa-users-viewfinder"></i>
                     </div>
@@ -73,7 +75,7 @@
                     <div class="related-list">
                         {% for rel in anime.relations %}
                         <a href="/anime/{{ rel.id }}" class="related-card" title="{{ rel.title }} ({{ rel.relationType }})">
-                            <img src="{{ rel.image }}" alt="{{ rel.title }}">
+                            <img src="{{ rel.image }}" alt="{{ rel.title }}" loading="lazy">
                             <div class="related-info">
                                 <span class="related-type">{{ rel.relationType }}</span>
                                 <span class="related-title">{{ rel.title }}</span>
@@ -170,7 +172,9 @@
                         {% for rec in recs[:12] %}
                         <a href="/anime/{{ rec.id }}" class="rec-card">
                             <div class="rec-poster">
-                                <img src="{{ rec.image }}" alt="{{ rec.title }}" loading="lazy">
+                                <div class="poster-wrapper skeleton" style="padding-top: 150%;">
+                                    <img src="{{ rec.image }}" alt="{{ rec.title }}" loading="lazy" onload="this.parentElement.classList.add('loaded'); this.parentElement.classList.remove('skeleton');">
+                                </div>
                                 <div class="rec-overlay">
                                     <div class="rec-stats">
                                         <span class="rec-type">{{ rec.type or 'TV' }}</span>
@@ -197,7 +201,9 @@
                     {% for item in pop_list[:10] %}
                     <a href="/anime/{{ item.id }}" class="popular-item">
                         <div class="pop-rank {% if loop.index <= 3 %}top-3{% endif %}">{{ loop.index }}</div>
-                        <img src="{{ item.banner }}" alt="{{ item.title }}" class="pop-img">
+                        <div class="poster-wrapper skeleton" style="width: 50px; height: 70px; padding-top: 0; flex-shrink: 0; border-radius: 4px;">
+                            <img src="{{ item.banner }}" alt="{{ item.title }}" class="pop-img" loading="lazy" onload="this.parentElement.classList.add('loaded'); this.parentElement.classList.remove('skeleton');">
+                        </div>
                         <div class="pop-details">
                             <h4 class="pop-title">{{ item.title }}</h4>
                             <div class="pop-meta">

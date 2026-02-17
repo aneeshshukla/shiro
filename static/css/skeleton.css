@@ -1,0 +1,111 @@
+/* Skeleton Loader Styles */
+.skeleton {
+    background-color: #222;
+    position: relative;
+    overflow: hidden;
+    border-radius: 4px;
+    z-index: 1;
+    display: block;
+}
+
+.skeleton::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.08) 50%,
+        transparent 100%
+    );
+    animation: shimmer 1.5s infinite;
+    transform: translateX(-100%);
+}
+
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+/* Image Wrapper for preserving aspect ratio */
+.poster-wrapper {
+    position: relative;
+    width: 100%;
+    /* Default aspect ratio suitable for most posters (2:3) */
+    padding-top: 150%; 
+    overflow: hidden;
+    border-radius: 6px;
+    background-color: #222; /* Fallback */
+}
+
+/* Hero Section Skeleton specific override if needed */
+.hero-skeleton {
+    padding-top: 56.25%; /* 16:9 for hero banners */
+}
+
+/* Image inside wrapper */
+.poster-wrapper img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    z-index: 2; /* Verify image is above skeleton bg */
+}
+
+/* When loaded, remove skeleton effect via JS class toggle or just let image cover it */
+.poster-wrapper.loaded {
+    background: none;
+}
+
+.poster-wrapper.loaded::after {
+    display: none;
+}
+
+.poster-wrapper.loaded img {
+    opacity: 1;
+}
+
+
+/* Video Player Buffer Spinner */
+.video-loader-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    transition: opacity 0.5s ease;
+}
+
+.video-loader-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    border-top-color: var(--primary, #FF5722);
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}

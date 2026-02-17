@@ -26,7 +26,9 @@
                 {% for anime in anime_list %}
                 <a href="/anime/{{ anime.id }}" class="anime-card-link" style="display: block; text-decoration: none;">
                     <div class="anime-card">
-                        <img src="{{ anime.image }}" alt="{{ anime.title }}" loading="lazy">
+                        <div class="poster-wrapper skeleton">
+                            <img src="{{ anime.image }}" alt="{{ anime.title }}" loading="lazy" onload="this.parentElement.classList.add('loaded'); this.parentElement.classList.remove('skeleton');">
+                        </div>
                         <div class="play-icon"><i class="fa-solid fa-play"></i></div>
                         
                         <div class="anime-card-overlay">
