@@ -9,7 +9,7 @@ load_dotenv()
 
 CLIENT_ID = os.getenv('CLIENT_ID')
 CLIENT_SECRET = os.getenv('CLIENT_SECRET')
-BETA_REDIRECT_URI = os.getenv('DISCORD_BETA_REDIRECT_URI')
+REDIRECT_URI = os.getenv('DISCORD_REDIRECT_URI')
 AUTHORIZATION_BASE_URL = 'https://discord.com/api/oauth2/authorize'
 TOKEN_URL = 'https://discord.com/api/oauth2/token'
 USER_INFO_URL = 'https://discord.com/api/users/@me'
@@ -209,7 +209,7 @@ def auth_discord():
     if session.get('user', None):
         return redirect(url_for('index'))
     scope = 'identify email'
-    discord_login_url = f"{AUTHORIZATION_BASE_URL}?response_type=code&client_id={CLIENT_ID}&redirect_uri={BETA_REDIRECT_URI}&scope={scope}"
+    discord_login_url = f"{AUTHORIZATION_BASE_URL}?response_type=code&client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&scope={scope}"
     return redirect(discord_login_url)
     
 
@@ -228,7 +228,7 @@ def callback():
                 'client_secret': CLIENT_SECRET,
                 'grant_type': 'authorization_code',
                 'code': code,
-                'redirect_uri': BETA_REDIRECT_URI
+                'redirect_uri': REDIRECT_URI
             }
             headers = {
                 'Content-Type': 'application/x-www-form-urlencoded'
