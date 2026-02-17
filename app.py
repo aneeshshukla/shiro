@@ -29,20 +29,46 @@ stream_client = StreamClient()
 # Home page
 @app.route('/')
 def index():
-    spotlight = anime_client.get_spotlight()
-    recent_episodes = anime_client.get_recent_episodes()
-    new_releases = anime_client.get_new_releases()
-    upcoming = anime_client.get_top_upcoming()
-    latest_completed = anime_client.get_latest_completed()
-    schedule = anime_client.get_schedule()
-    # Ensure allow iteration even if empty
+    # Render template immediately with no data (Client-side will fetch)
     return render_template('index.html', 
-                         spotlight=spotlight,
-                         recent_episodes=recent_episodes,
-                         new_releases=new_releases,
-                         upcoming=upcoming,
-                         latest_completed=latest_completed,
-                         schedule=schedule)
+                         spotlight=None,
+                         recent_episodes=None,
+                         new_releases=None,
+                         upcoming=None,
+                         latest_completed=None,
+                         schedule=None)
+
+# --- API Endpoints for Home Page Hydration ---
+
+@app.route('/api/home/spotlight')
+def api_home_spotlight():
+    data = anime_client.get_spotlight()
+    return jsonify(data if data else [])
+
+@app.route('/api/home/recent-episodes')
+def api_home_recent():
+    data = anime_client.get_recent_episodes()
+    return jsonify(data if data else {})
+
+@app.route('/api/home/new-releases')
+def api_home_new_releases():
+    data = anime_client.get_new_releases()
+    return jsonify(data if data else {})
+
+@app.route('/api/home/upcoming')
+def api_home_upcoming():
+    data = anime_client.get_top_upcoming()
+    return jsonify(data if data else {})
+
+@app.route('/api/home/completed')
+def api_home_completed():
+    data = anime_client.get_latest_completed()
+    return jsonify(data if data else {})
+
+@app.route('/api/home/schedule')
+def api_home_schedule():
+    data = anime_client.get_schedule()
+    return jsonify(data if data else {})
 
 # Search anime
 @app.route('/search')
@@ -195,41 +221,46 @@ def callback():
     if 'code' in request.args:
         code = request.args['code']
         
-        # Exchange code for access token
-        data = {
-            'client_id': CLIENT_ID,
-            'client_secret': CLIENT_SECRET,
-            'grant_type': 'authorization_code',
-            'code': code,
-            'redirect_uri': REDIRECT_URI
-        }
-        headers = {
-            'Content-Type': 'application/x-www-form-urlencoded'
-        }
-        
-        response = requests.post(TOKEN_URL, data=data, headers=headers)
-        response.raise_for_status()
-        tokens = response.json()
-        access_token = tokens['access_token']
+        try:
+            # Exchange code for access token
+            data = {
+                'client_id': CLIENT_ID,
+                'client_secret': CLIENT_SECRET,
+                'grant_type': 'authorization_code',
+                'code': code,
+                'redirect_uri': REDIRECT_URI
+            }
+            headers = {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+            
+            response = requests.post(TOKEN_URL, data=data, headers=headers)
+            response.raise_for_status()
+            tokens = response.json()
+            access_token = tokens['access_token']
 
-        # Get user info
-        user_headers = {
-            'Authorization': f"Bearer {access_token}"
-        }
-        user_response = requests.get(USER_INFO_URL, headers=user_headers)
-        user_response.raise_for_status()
-        user_data = user_response.json()
-        # print(user_data)
-        db.sync_oauth_user(
-            provider="discord",
-            provider_id=user_data['id'],
-            display_name=user_data['global_name'],
-            username=user_data['username'],
-            email=user_data['email'],
-            avatar=user_data['avatar']
-        )
-        session['user'] = user_data
-        return redirect(url_for('index'))
+            # Get user info
+            user_headers = {
+                'Authorization': f"Bearer {access_token}"
+            }
+            user_response = requests.get(USER_INFO_URL, headers=user_headers)
+            user_response.raise_for_status()
+            user_data = user_response.json()
+
+            db.sync_oauth_user(
+                provider="discord",
+                provider_id=user_data['id'],
+                display_name=user_data.get('global_name') or user_data.get('username', ''),
+                username=user_data.get('username', ''),
+                email=user_data.get('email', ''),
+                avatar=user_data.get('avatar', '')
+            )
+            session['user'] = user_data
+            return redirect(url_for('index'))
+        
+        except requests.exceptions.RequestException as e:
+            print(f"Discord OAuth Error: {e}")
+            return redirect(url_for('login'))
     
     return 'Unknown Error', 400
 

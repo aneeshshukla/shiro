@@ -26,13 +26,17 @@
             <!-- Video Player -->
             <div class="video-wrapper">
                 {% if streams and streams.sources %}
+                    <div class="video-loader-overlay" id="video-loader">
+                        <div class="spinner"></div>
+                    </div>
                     <iframe 
                         id="player-iframe" 
                         src="{{ streams.sources[0].url }}" 
                         allowfullscreen="true" 
                         scrolling="no" 
                         allow="autoplay; fullscreen"
-                        autoplay>
+                        autoplay
+                        onload="document.getElementById('video-loader').classList.add('hidden')">
                     </iframe>
                 {% else %}
                     <div class="video-overlay text-center">
