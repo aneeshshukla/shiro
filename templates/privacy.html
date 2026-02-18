@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Privacy Policy - Shiro{% endblock %}
+{% block title %}Privacy Policy - SHIRO{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -8,32 +8,49 @@
         max-width: 800px;
         margin: 40px auto;
         padding: 40px;
-        background: rgba(20, 26, 34, 0.95);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        border-radius: 12px;
-        color: #ccd6f6;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 14px;
+        color: #bbb;
     }
-    
+
     .legal-container h1 {
-        font-size: 2.5rem;
-        margin-bottom: 20px;
+        font-size: 2.2rem;
+        font-weight: 800;
+        margin-bottom: 8px;
         color: #fff;
-        border-bottom: 2px solid #a3c539;
-        display: inline-block;
-        padding-bottom: 10px;
+    }
+
+    .legal-container h1::after {
+        content: '';
+        display: block;
+        width: 48px;
+        height: 3px;
+        background: var(--primary);
+        border-radius: 2px;
+        margin-top: 12px;
+        margin-bottom: 20px;
+    }
+
+    .legal-container .last-updated {
+        color: #555;
+        font-size: 0.85rem;
+        margin-bottom: 28px;
     }
 
     .legal-container h2 {
-        font-size: 1.5rem;
-        margin-top: 30px;
-        margin-bottom: 15px;
-        color: #e6f1ff;
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-top: 28px;
+        margin-bottom: 12px;
+        color: #ddd;
     }
 
     .legal-container p {
-        line-height: 1.6;
-        margin-bottom: 15px;
-        color: #8892b0;
+        line-height: 1.7;
+        margin-bottom: 14px;
+        color: #999;
+        font-size: 0.92rem;
     }
 </style>
 {% endblock %}
@@ -41,7 +58,7 @@
 {% block content %}
 <div class="legal-container">
     <h1>Privacy Policy</h1>
-    <p>Last updated: February 16, 2026</p>
+    <p class="last-updated">Last updated: February 16, 2026</p>
 
     <h2>1. Information We Collect</h2>
     <p>When you log in with Discord or Google, we collect basic profile information such as your username, avatar, and user ID to create your profile. We also store your watch history and preferences locally or in our database to enhance your experience.</p>

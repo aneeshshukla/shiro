@@ -1,9 +1,18 @@
 from flask import Flask, render_template, request, session, jsonify, redirect, url_for, Response
-import os, requests
+import os
+import logging
+import requests
 from dotenv import load_dotenv
 from services import AnimeDataClient, StreamClient
 import database
-db = database.UserManager()
+
+logger = logging.getLogger(__name__)
+
+try:
+    db = database.UserManager()
+except Exception as e:
+    logger.error("Failed to initialize database: %s", e)
+    db = None
 
 load_dotenv()
 
@@ -27,10 +36,39 @@ anime_client = AnimeDataClient()
 stream_client = StreamClient()
 
 # Home page
+
+# Security: API Origin Check
+@app.before_request
+def check_api_origin():
+    if request.path.startswith('/api/'):
+        allowed_sites = os.environ.get('ALLOWED_SITES', '').split(',')
+        if not allowed_sites or allowed_sites == ['']:
+            return # No restriction if env not set
+
+        allowed = [s.strip().rstrip('/') for s in allowed_sites if s.strip()]
+        if not allowed:
+            return
+
+        origin = request.headers.get('Origin')
+        referer = request.headers.get('Referer')
+
+        # Allow if Origin matches
+        if origin and origin.rstrip('/') in allowed:
+            return
+
+        # Allow if Referer starts with allowed site
+        if referer and any(referer.startswith(s) for s in allowed):
+            return
+
+        # Block if no match (or missing headers)
+        logger.warning("Blocked API request from Origin: %s, Referer: %s", origin, referer)
+        return jsonify({'error': 'Unauthorized Origin/Referer'}), 403
+
 @app.route('/')
 def index():
     # Render template immediately with no data (Client-side will fetch)
     return render_template('index.html', 
+                         current_page='home',
                          spotlight=None,
                          recent_episodes=None,
                          new_releases=None,
@@ -65,9 +103,29 @@ def api_home_completed():
     data = anime_client.get_latest_completed()
     return jsonify(data if data else {})
 
+@app.route('/api/home/favourites')
+def api_home_favourites():
+    data = anime_client.get_favourites()
+    return jsonify(data if data else {})
+
 @app.route('/api/home/schedule')
 def api_home_schedule():
-    data = anime_client.get_schedule()
+    day = request.args.get('day', None, type=int)
+    data = anime_client.get_schedule(day=day)
+    return jsonify(data if data else {})
+
+# Schedule page
+@app.route('/schedule')
+def schedule():
+    return render_template('schedule.html', current_page='schedule')
+
+@app.route('/api/schedule/<day>')
+def api_schedule_day(day):
+    try:
+        day_num = int(day)
+    except ValueError:
+        day_num = None
+    data = anime_client.get_schedule(day=day_num)
     return jsonify(data if data else {})
 
 # Search anime
@@ -78,11 +136,12 @@ def search():
     if not query:
         # Fallback to specials if no query, preserving original logic
         results = anime_client.fetch('specials', {"page": page})
-        return render_template('search.html', page=page, query='', results=results)
+        return render_template('search.html', current_page='search', page=page, query='', results=results)
     
     results = anime_client.search(query, page)
     
     return render_template('search.html', 
+                         current_page='search',
                          results=results, 
                          query=query,
                          page=page)
@@ -107,7 +166,7 @@ def anime_info(anime_id):
     
     # Fetch popular data for the sidebar
     most_popular = anime_client.get_spotlight()    
-    return render_template('anime_info.html', anime=info, most_popular=most_popular)
+    return render_template('anime_info.html', current_page='', anime=info, most_popular=most_popular)
 
 # Watch episode
 @app.route('/watch/<episode_id>')
@@ -137,7 +196,7 @@ def watch(episode_id):
         )
 
     except Exception as e:
-        print(f"Flask Error in watch: {e}")
+        logger.error("Flask Error in watch: %s", e)
         return render_template('error.html', message="Internal Server Error"), 500
 
 # Browse by category
@@ -145,8 +204,8 @@ def watch(episode_id):
 def browse(category):
     page = request.args.get('page', 1, type=int)
     
-    valid_categories = ['movies', 'tv', 'ova', 'ona', 'specials', 
-                       'recent-episodes', 'recent-added', 'new-releases', 
+    valid_categories = ['movies', 'tv', 'ova', 'ona', 'specials',
+                       'recent-episodes', 'recent-added', 'new-releases',
                        'latest-completed']
     
     if category not in valid_categories:
@@ -154,6 +213,7 @@ def browse(category):
     
     data = anime_client.get_by_category(category, page)
     return render_template('browse.html', 
+                         current_page='search',
                          data=data,
                          category=category,
                          page=page)
@@ -165,10 +225,23 @@ def browse_genre(genre_name):
     
     data = anime_client.get_by_genre(genre_name, page)
     return render_template('browse.html', 
+                         current_page='search',
                          data=data,
-                         category=genre_name, # Reusing category for title display
+                         category=genre_name,
                          page=page,
                          is_genre=True)
+
+# Random Anime
+@app.route('/random')
+def random_anime():
+    try:
+        data = anime_client.get_random_anime()
+        if data and isinstance(data, dict) and 'id' in data:
+            return redirect(url_for('anime_info', anime_id=data['id']))
+        return redirect(url_for('index'))
+    except Exception as e:
+        logger.error("Error fetching random anime: %s", e)
+        return redirect(url_for('index'))
 
 # API endpoint for dynamic loading
 @app.route('/api/anime/<anime_id>')
@@ -177,13 +250,6 @@ def api_anime_info(anime_id):
     return jsonify(info if info else {})
 
 # API endpoint for streaming links
-@app.route('/api/search-suggestions/<search>')
-def api_search_suggest(search):
-    # This route name is confusing in original code vs 'suggestions' route.
-    # Original: fetch_api(f'search-suggestions/{search}')
-    # It might be an alternative way to search.
-    data = anime_client.fetch(f'search-suggestions/{search}')
-    return jsonify(data if data else {})
 
 @app.route('/api/watch/<episode_id>')
 def api_watch(episode_id):
@@ -196,7 +262,7 @@ def api_watch(episode_id):
 def profile():
     if not session.get('user', None):
         return redirect(url_for('login'))
-    return render_template('profile.html')
+    return render_template('profile.html', current_page='profile')
 
 @app.route('/login')
 def login():
@@ -247,19 +313,22 @@ def callback():
             user_response.raise_for_status()
             user_data = user_response.json()
 
-            db.sync_oauth_user(
-                provider="discord",
-                provider_id=user_data['id'],
-                display_name=user_data.get('global_name') or user_data.get('username', ''),
-                username=user_data.get('username', ''),
-                email=user_data.get('email', ''),
-                avatar=user_data.get('avatar', '')
-            )
+            if db:
+                db.sync_oauth_user(
+                    provider="discord",
+                    provider_id=user_data['id'],
+                    display_name=user_data.get('global_name') or user_data.get('username', ''),
+                    username=user_data.get('username', ''),
+                    email=user_data.get('email', ''),
+                    avatar=user_data.get('avatar', '')
+                )
+            else:
+                logger.warning("Database unavailable, skipping user sync")
             session['user'] = user_data
             return redirect(url_for('index'))
         
         except requests.exceptions.RequestException as e:
-            print(f"Discord OAuth Error: {e}")
+            logger.error("Discord OAuth Error: %s", e)
             return redirect(url_for('login'))
     
     return 'Unknown Error', 400

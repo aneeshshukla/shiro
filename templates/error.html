@@ -1,21 +1,97 @@
 {% extends "base.html" %}
 
-{% block title %}Error - ShiRo{% endblock %}
+{% block title %}Error - SHIRO{% endblock %}
+
+{% block extra_css %}
+<style>
+    .error-page {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 70vh;
+        padding: 40px 20px;
+        text-align: center;
+    }
+
+    .error-image {
+        max-width: 240px;
+        border-radius: 16px;
+        margin-bottom: 24px;
+        opacity: 0.85;
+    }
+
+    .error-message {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 8px;
+    }
+
+    .error-sub {
+        color: #666;
+        font-size: 0.95rem;
+        margin-bottom: 28px;
+    }
+
+    .error-actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .error-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 28px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .error-btn-primary {
+        background: var(--primary);
+        color: #fff;
+        box-shadow: 0 4px 16px rgba(229,9,20,0.25);
+    }
+
+    .error-btn-primary:hover {
+        background: var(--primary-hover);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 24px rgba(229,9,20,0.4);
+    }
+
+    .error-btn-secondary {
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.08);
+        color: #ccc;
+    }
+
+    .error-btn-secondary:hover {
+        background: rgba(255,255,255,0.1);
+        color: #fff;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-    <div style="text-align: center; margin-top: 5rem;">
-        <!-- <h1 style="font-size: 4rem;">😕</h1> -->
-        <img src="{{ url_for('static', filename='fafuke-sasuke.webp') }}" loading="lazy">
-        <h2 style="margin: 2rem 0;">{{ message }}</h2>
-        <a href="/" style="padding: 1rem 2rem; background: #667eea; color: #fff; text-decoration: none; border-radius: 8px;">
-            Go Home
+<div class="error-page">
+    <img src="{{ url_for('static', filename='fafuke-sasuke.webp') }}" alt="Error" class="error-image" loading="lazy">
+    <h2 class="error-message">{{ message }}</h2>
+    <p class="error-sub">Something went wrong. Please try again or go back home.</p>
+    <div class="error-actions">
+        <a href="/" class="error-btn error-btn-primary">
+            <i class="fa-solid fa-house"></i> Go Home
         </a>
         {% if alt_link %}
-        <br>
-        <br>
-            <a href="{{ alt_link }}" style="padding: 1rem 2rem; color: #fff; text-decoration: none; border-radius: 8px;">
-                Watch on AnimeKai
-            </a>
+        <a href="{{ alt_link }}" class="error-btn error-btn-secondary">
+            <i class="fa-solid fa-external-link-alt"></i> Watch on AnimeKai
+        </a>
         {% endif %}
     </div>
+</div>
 {% endblock %}

@@ -1,4 +1,5 @@
 import os
+import logging
 import requests
 from dotenv import load_dotenv
 from cachetools import TTLCache, cached
@@ -6,16 +7,27 @@ from cachetools.keys import hashkey
 
 load_dotenv()
 
+logger = logging.getLogger(__name__)
+
 # Cache configuration
-# We can use separate caches if needed, or a shared one. 
-# Given the high read nature, caching is good.
 api_cache = TTLCache(maxsize=200, ttl=300)
+
 
 def make_cache_key(endpoint, params=None):
     if params is None:
         return hashkey(endpoint)
-    # Convert params to a sorted tuple of items to be hashable
     return hashkey(endpoint, tuple(sorted(params.items())) if params else None)
+
+
+def _extract_results(data, fallback=None):
+    """Safely extract results from API response data.
+    Returns data['results'] if dict, data itself if list, or fallback."""
+    if fallback is None:
+        fallback = []
+    if isinstance(data, dict):
+        return data.get('results', fallback)
+    return data if data else fallback
+
 
 class BaseClient:
     def __init__(self, base_url):
@@ -24,22 +36,23 @@ class BaseClient:
     def _get(self, endpoint, params=None):
         """Internal get method with error handling."""
         if not self.base_url:
-            print(f"Error: Base URL not configured for {self.__class__.__name__}")
+            logger.error("Base URL not configured for %s", self.__class__.__name__)
             return None
 
         try:
             url = f"{self.base_url}/{endpoint}"
-            print(f"[{self.__class__.__name__}] Fetching: {url} Params: {params}")
-            response = requests.get(url, params=params, timeout=10) # Added timeout
+            logger.info("[%s] Fetching: %s Params: %s", self.__class__.__name__, url, params)
+            response = requests.get(url, params=params, timeout=10)
             response.raise_for_status()
             return response.json()
         except requests.exceptions.RequestException as e:
-            print(f"[{self.__class__.__name__}] API Error: {e}")
+            logger.error("[%s] API Error: %s", self.__class__.__name__, e)
             return None
+
 
 class AnimeDataClient(BaseClient):
     """Client for general anime data (Spotlight, Search, Info)."""
-    
+
     def __init__(self):
         super().__init__(os.getenv('BASE_URL'))
 
@@ -48,72 +61,134 @@ class AnimeDataClient(BaseClient):
         """
         Fetches data from the anime API.
         Returns a list or dict depending on endpoint.
-        Safely returns empty list/dict on failure to prevent crashes.
+        Safely returns None on failure to let callers handle it.
         """
         data = self._get(endpoint, params)
         if data is None:
-            print(f"[Services] Warning: No data received for endpoint '{endpoint}'")
-            # Default fallback based on expected return types could be complex,
-            # but returning None allows the caller to handle 404s if needed,
-            # OR we return empty structures. 
-            # App.py was blindly accessing [0], implying it expected a list.
-            # let's return None here and handle it in the service methods below.
+            logger.warning("No data received for endpoint '%s'", endpoint)
             return None
         return data
 
     def get_spotlight(self):
-        data = self.fetch('spotlight')
-        return data if data else []
+        """Trending anime for hero/spotlight section."""
+        data = self.fetch('trending', {'page': 1, 'perPage': 10})
+        return _extract_results(data)
 
     def get_recent_episodes(self):
-        data = self.fetch('recent-episodes')
-        return data if data else []
+        """Currently airing anime (latest episodes via advanced search)."""
+        data = self.fetch('advanced-search', {
+            'status': 'RELEASING',
+            'sort': '["UPDATED_AT_DESC"]',
+            'perPage': 20
+        })
+        return _extract_results(data)
 
     def get_new_releases(self):
-        data = self.fetch('new-releases')
-        return data if data else []
+        """Popular anime (replaces old new-releases)."""
+        data = self.fetch('popular', {'page': 1, 'perPage': 20})
+        return _extract_results(data)
 
     def get_top_upcoming(self):
-        data = self.fetch('top-upcoming')
-        return data if data else []
+        """Upcoming anime via advanced search."""
+        data = self.fetch('advanced-search', {
+            'status': 'NOT_YET_RELEASED',
+            'sort': '["POPULARITY_DESC"]',
+            'perPage': 20
+        })
+        return _extract_results(data)
+
+    def get_favourites(self):
+        """All-time favourite anime via advanced search."""
+        data = self.fetch('advanced-search', {
+            'sort': '["FAVOURITES_DESC"]',
+            'perPage': 20
+        })
+        return _extract_results(data)
 
     def get_latest_completed(self):
-        data = self.fetch('latest-completed')
-        return data if data else []
+        """Recently finished anime via advanced search."""
+        data = self.fetch('advanced-search', {
+            'status': 'FINISHED',
+            'sort': '["END_DATE_DESC"]',
+            'perPage': 20
+        })
+        return _extract_results(data)
 
-    def get_schedule(self):
-        data = self.fetch('schedule/today')
-        return data if data else []
+    def get_schedule(self, day=None):
+        """Fetch airing schedule."""
+        params = {'perPage': 50}
+        if day is not None:
+            params['day'] = day
+        data = self.fetch('airing-schedule', params)
+        return data if data else {'results': []}
+
+    def get_schedule_by_day(self, day_num):
+        return self.get_schedule(day=day_num)
 
     def search(self, query, page=1):
+        """Search anime by title. GET /meta/anilist/{query}?page={page}"""
         if not query:
-            return {'results': []} # mimics structure
-        
-        # Original code did fetch_api(query). 
-        # Assuming the API supports /{query} as a search path or similar.
-        # If it's a standard consumet API, it usually uses /{marketing_path}/{query} 
-        # But complying with user's original logic:
-        data = self.fetch(query, params={'page': page} if page > 1 else None)
+            return {'results': []}
+        params = {'page': page} if page > 1 else None
+        data = self.fetch(query, params)
         return data if data else {'results': []}
 
     def get_search_suggestions(self, query):
+        """Use simple search for suggestions."""
         if not query:
             return []
-        data = self.fetch('search-suggestions', {'query': query})
+        data = self.fetch(query, {'perPage': 8})
+        if isinstance(data, dict) and 'results' in data:
+            return data['results']
         return data if data else []
 
     def get_info(self, anime_id):
-        data = self.fetch('info', {'id': anime_id})
+        """Get full anime info. GET /meta/anilist/info/{id}"""
+        data = self.fetch(f'info/{anime_id}')
         return data
 
     def get_by_category(self, category, page=1):
-        data = self.fetch(category, params={'page': page} if page > 1 else None)
+        """Browse by category using advanced search with format mapping."""
+        category_map = {
+            'movies': {'format': 'MOVIE'},
+            'tv': {'format': 'TV'},
+            'ova': {'format': 'OVA'},
+            'ona': {'format': 'ONA'},
+            'specials': {'format': 'SPECIAL'},
+            'recent-episodes': {},
+            'recent-added': {'sort': '["UPDATED_AT_DESC"]'},
+            'new-releases': {'sort': '["START_DATE_DESC"]'},
+            'latest-completed': {'status': 'FINISHED', 'sort': '["END_DATE_DESC"]'},
+        }
+
+        if category == 'recent-episodes':
+            data = self.fetch('recent-episodes', {'page': page, 'perPage': 20})
+            return data if data else []
+
+        params = {'page': page, 'perPage': 20, 'type': 'ANIME'}
+        params.update(category_map.get(category, {}))
+        data = self.fetch('advanced-search', params)
         return data if data else []
 
     def get_by_genre(self, genre, page=1):
-        # User specified base_URL/genre/action structure
-        data = self.fetch(f'genre/{genre}', params={'page': page})
+        """Browse by genre using advanced search."""
+        data = self.fetch('advanced-search', {
+            'genres': f'["{genre}"]',
+            'page': page,
+            'perPage': 20,
+            'type': 'ANIME',
+            'sort': '["POPULARITY_DESC"]'
+        })
         return data if data else {}
+
+    def get_random_anime(self):
+        """Fetch a random anime."""
+        data = self.fetch('random-anime')
+        if isinstance(data, dict):
+            return data
+        if isinstance(data, list) and data:
+            return data[0]
+        return None
 
 
 class StreamClient(BaseClient):
@@ -122,11 +197,11 @@ class StreamClient(BaseClient):
     def __init__(self):
         super().__init__(os.getenv('STREAM_URL'))
 
-    @cached(api_cache, key=lambda self, episode_id, category='sub', ep_num='1': make_cache_key(f"stream_{episode_id}", {'category': category, 'ep': ep_num}))
+    @cached(api_cache, key=lambda self, episode_id, category='sub', ep_num='1': make_cache_key(
+        f"stream_{episode_id}", {'category': category, 'ep': ep_num}
+    ))
     def get_stream_data(self, episode_id, category='sub', ep_num='1'):
-        """
-        Fetches streaming data.
-        """
+        """Fetches streaming data."""
         params = {'ep': ep_num, 'category': category}
         data = self._get(episode_id, params)
         return data

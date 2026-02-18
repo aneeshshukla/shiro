@@ -10,6 +10,8 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 
 class UserManager:
     def __init__(self):
+        if not DATABASE_URL:
+            raise ValueError("DATABASE_URL environment variable is not set")
         # Create a connection pool
         # minconn=1, maxconn=10 (adjust as needed)
         self.pool = SimpleConnectionPool(

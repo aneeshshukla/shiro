@@ -2,10 +2,12 @@ def generate_sitemap_xml(base_url):
     # Static pages
     pages = [
         '/login',
-        '/terms',
-        '/privacy',
+        '/terms-of-service',
+        '/privacy-policy',
         '/search',
-        '/profile'
+        '/profile',
+        '/schedule',
+        '/random'
     ]
     
     # Dynamic categories

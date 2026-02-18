@@ -13,181 +13,153 @@
 
 {% block content %}
     <!-- Hero Section -->
-    <!-- Hero Section -->
     <section class="hero-section" id="hero-section">
         <div class="hero-slider" id="hero-slider">
             <!-- Skeleton Slide -->
             <div class="hero-slide active">
                 <div class="poster-wrapper hero-skeleton skeleton"></div>
                 <div class="hero-gradient"></div>
+                
+                <!-- Badge Skeleton -->
+                <div class="hero-ep-badge skeleton" style="width: 80px; height: 32px; padding: 0; background: rgba(255,255,255,0.1); border: none;"></div>
+
                 <div class="hero-content">
-                    <div class="skeleton" style="height: 40px; width: 60%; margin-bottom: 20px;"></div>
-                    <div class="hero-meta">
-                        <div class="skeleton" style="height: 20px; width: 100px;"></div>
+                    <div class="hero-text" style="width: 100%;">
+                        <!-- Meta -->
+                        <div class="skeleton" style="height: 16px; width: 180px; margin-bottom: 12px; border-radius: 4px;"></div>
+                        <!-- Title -->
+                        <div class="skeleton" style="height: 40px; width: 70%; margin-bottom: 16px; border-radius: 4px;"></div>
+                        <!-- Description -->
+                        <div class="skeleton" style="height: 16px; width: 90%; margin-bottom: 8px; border-radius: 4px;"></div>
+                        <div class="skeleton" style="height: 16px; width: 60%; margin-bottom: 0; border-radius: 4px;"></div>
                     </div>
-                    <div class="skeleton" style="height: 80px; width: 80%; margin: 20px 0;"></div>
                     <div class="hero-buttons">
-                        <div class="skeleton" style="height: 40px; width: 120px; border-radius: 4px;"></div>
-                        <div class="skeleton" style="height: 40px; width: 50px; border-radius: 4px;"></div>
+                        <div class="skeleton" style="height: 42px; width: 130px; border-radius: 6px;"></div>
+                        <div class="skeleton" style="height: 42px; width: 110px; border-radius: 6px;"></div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
+    <!-- Genre Tabs -->
+    <div class="genre-tabs-wrapper">
+        <button class="genre-scroll-btn genre-scroll-left" onclick="scrollGenres(-200)"><i class="fa-solid fa-chevron-left"></i></button>
+        <div class="genre-tabs" id="genre-tabs">
+            <a href="/browse/all" class="genre-tab active">All</a>
+            <a href="/browse/action" class="genre-tab">Action</a>
+            <a href="/browse/adventure" class="genre-tab">Adventure</a>
+            <a href="/browse/comedy" class="genre-tab">Comedy</a>
+            <a href="/browse/drama" class="genre-tab">Drama</a>
+            <a href="/browse/ecchi" class="genre-tab">Ecchi</a>
+            <a href="/browse/fantasy" class="genre-tab">Fantasy</a>
+            <a href="/browse/horror" class="genre-tab">Horror</a>
+            <a href="/browse/mahou-shoujo" class="genre-tab">Mahou Shoujo</a>
+            <a href="/browse/mecha" class="genre-tab">Mecha</a>
+            <a href="/browse/music" class="genre-tab">Music</a>
+            <a href="/browse/mystery" class="genre-tab">Mystery</a>
+            <a href="/browse/psychological" class="genre-tab">Psychological</a>
+            <a href="/browse/romance" class="genre-tab">Romance</a>
+            <a href="/browse/sci-fi" class="genre-tab">Sci-Fi</a>
+        </div>
+        <button class="genre-scroll-btn genre-scroll-right" onclick="scrollGenres(200)"><i class="fa-solid fa-chevron-right"></i></button>
+    </div>
+
     <div class="main-content">
-        <!-- Flex Container for Content + Sidebar -->
-        <div class="content-wrapper" style="display: flex; gap: 30px; flex-wrap: wrap;">
+        <!-- Content Wrapper: Main + Sidebar -->
+        <div class="content-wrapper">
             
-            <!-- LEFT COLUMN: Main Lists (75%) -->
-            <div style="flex: 3; min-width: 300px;">
+            <!-- LEFT: Main Content -->
+            <div class="content-main">
                 
-                <!-- Latest Updates (Existing) -->
+                <!-- Latest Episodes -->
                 <div class="section-header">
-                    <h2 class="section-title">Latest Updates</h2>
-                    <div style="color: #888; font-size: 0.9rem;">
-                        <span style="color: var(--primary); font-weight: 700;">All</span> 
-                        <span style="margin: 0 10px;">Sub</span> 
-                        <span>Dub</span>
+                    <h2 class="section-title"><i class="fa-regular fa-clock"></i> Latest Episodes</h2>
+                    <div class="section-nav">
+                        <button class="section-nav-btn"><i class="fa-solid fa-chevron-left"></i></button>
+                        <button class="section-nav-btn"><i class="fa-solid fa-chevron-right"></i></button>
                     </div>
                 </div>
 
                 <div class="anime-grid" id="recent-updates">
-                    <!-- Skeletons will be injected here by JS -->
                     {% for i in range(12) %}
                     <div class="anime-card-link" style="text-decoration: none;">
                         <div class="anime-card">
                             <div class="poster-wrapper skeleton"></div>
                         </div>
                         <div class="anime-card-info">
-                            <div class="skeleton" style="height: 14px; width: 80%; margin-bottom: 5px;"></div>
-                            <div class="skeleton" style="height: 12px; width: 40%;"></div>
+                            <div class="skeleton" style="height: 13px; width: 80%; margin-bottom: 4px; border-radius: 3px;"></div>
+                            <div class="skeleton" style="height: 11px; width: 40%; border-radius: 3px;"></div>
                         </div>
                     </div>
                     {% endfor %}
                 </div>
 
-                <!-- 3-Column Lists: New Releases, Upcoming, Completed -->
-                <div class="triple-list-grid">
-                    
-                    <!-- Col 1: New Releases -->
-                    <div class="list-column">
-                        <div class="section-header small">
-                            <h3 class="column-title">New Releases</h3>
-                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                <!-- Top Airing / Most Popular / Favourites -->
+                <div class="section-header">
+                    <div class="section-filter-tabs">
+                        <span class="filter-tab active" data-tab="top-airing">Top Airing</span>
+                        <span class="filter-tab" data-tab="most-popular">Most Popular</span>
+                        <span class="filter-tab" data-tab="favourites">Favourites</span>
+                    </div>
+                    <div class="section-nav">
+                        <button class="section-nav-btn"><i class="fa-solid fa-chevron-left"></i></button>
+                        <button class="section-nav-btn"><i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+                </div>
+
+                <div class="anime-grid" id="tabbed-grid">
+                    {% for i in range(10) %}
+                    <div class="anime-card-link" style="text-decoration: none;">
+                        <div class="anime-card">
+                            <div class="poster-wrapper skeleton"></div>
                         </div>
-                        <div class="vertical-list" id="new-releases">
-                            {% for i in range(5) %}
-                            <div class="v-item">
-                                <div class="poster-wrapper skeleton" style="width: 50px; height: 70px; padding-top: 0; flex-shrink: 0;"></div>
-                                <div class="v-info" style="width: 100%;">
-                                    <div class="skeleton" style="height: 14px; width: 90%; margin-bottom: 5px;"></div>
-                                    <div class="skeleton" style="height: 12px; width: 50%;"></div>
-                                </div>
-                            </div>
-                            {% endfor %}
+                        <div class="anime-card-info">
+                            <div class="skeleton" style="height: 13px; width: 80%; margin-bottom: 4px; border-radius: 3px;"></div>
+                            <div class="skeleton" style="height: 11px; width: 40%; border-radius: 3px;"></div>
                         </div>
                     </div>
-
-                    <!-- Col 2: Upcoming -->
-                    <div class="list-column">
-                        <div class="section-header small">
-                            <h3 class="column-title">Upcoming</h3>
-                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                        </div>
-                        <div class="vertical-list" id="upcoming">
-                            {% for i in range(5) %}
-                            <div class="v-item">
-                                <div class="poster-wrapper skeleton" style="width: 50px; height: 70px; padding-top: 0; flex-shrink: 0;"></div>
-                                <div class="v-info" style="width: 100%;">
-                                    <div class="skeleton" style="height: 14px; width: 90%; margin-bottom: 5px;"></div>
-                                    <div class="skeleton" style="height: 12px; width: 50%;"></div>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-
-                    <!-- Col 3: Completed -->
-                    <div class="list-column">
-                        <div class="section-header small">
-                            <h3 class="column-title">Completed</h3>
-                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                        </div>
-                        <div class="vertical-list" id="completed">
-                             {% for i in range(5) %}
-                            <div class="v-item">
-                                <div class="poster-wrapper skeleton" style="width: 50px; height: 70px; padding-top: 0; flex-shrink: 0;"></div>
-                                <div class="v-info" style="width: 100%;">
-                                    <div class="skeleton" style="height: 14px; width: 90%; margin-bottom: 5px;"></div>
-                                    <div class="skeleton" style="height: 12px; width: 50%;"></div>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-
+                    {% endfor %}
                 </div>
             </div>
 
-            <!-- RIGHT COLUMN: Schedule Sidebar (25%) -->
-            <div class="sidebar" style="flex: 1; min-width: 250px;">
+            <!-- RIGHT: Content Sidebar -->
+            <div class="content-sidebar">
                 
-                <!-- Top Trending (Moved Up) -->
-                <div class="section-header">
-                    <h2 class="section-title" style="color: #fff;"><i class="fa-solid fa-ranking-star" style="color: var(--primary); margin-right: 8px;"></i> Top Trending</h2>
-                </div>
-                
-                <div class="release-list" id="top-trending" style="margin-bottom: 40px;">
-                     {% for i in range(5) %}
-                    <div class="release-item" style="align-items: center; background: transparent; padding: 10px 0; border-bottom: 1px solid #222;">
-                        <div style="width: 30px; margin-right: 15px;">
-                            <div class="skeleton" style="height: 20px; width: 100%;"></div>
-                        </div>
-                        <div class="poster-wrapper skeleton" style="width: 50px; height: 70px; margin: 0 15px; padding-top: 0; flex-shrink: 0;"></div>
-                        <div class="release-info" style="width: 100%;">
-                            <div class="skeleton" style="height: 14px; width: 90%; margin-bottom: 5px;"></div>
-                            <div class="skeleton" style="height: 12px; width: 60%;"></div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-
-                <!-- Schedule Widget (Moved Down) -->
-                <div class="schedule-box">
-                    <div class="schedule-header">
-                        <div class="sched-nav btn-prev"><i class="fa-solid fa-chevron-left"></i></div>
-                        
-                        <div class="sched-dates">
-                            <div class="sched-day active">
-                                <span class="sd-name">SUN</span>
-                                <span class="sd-num">01</span>
-                            </div>
-                            <div class="sched-day">
-                                <span class="sd-name">MON</span>
-                                <span class="sd-num">02</span>
-                            </div>
-                            <div class="sched-day">
-                                <span class="sd-name">TUE</span>
-                                <span class="sd-num">03</span>
-                            </div>
-                        </div>
-
-                        <div class="sched-nav btn-next"><i class="fa-solid fa-chevron-right"></i></div>
-                    </div>
-
-                    <div class="schedule-list" id="schedule-list">
+                <!-- Latest Completed -->
+                <div class="sidebar-section">
+                    <h3 class="sidebar-section-title"><i class="fa-solid fa-check-circle"></i> Latest Completed</h3>
+                    <div class="release-list" id="top-trending">
                         {% for i in range(5) %}
-                        <div class="sched-item">
-                            <div class="skeleton" style="height: 14px; width: 50px; margin-right: 15px;"></div>
-                            <div class="sched-info" style="width: 100%;">
-                                <div class="skeleton" style="height: 14px; width: 90%; margin-bottom: 5px;"></div>
-                                <div class="skeleton" style="height: 12px; width: 60%;"></div>
+                        <div class="release-item">
+                            <div class="poster-wrapper skeleton" style="width: 45px; height: 60px; padding-top: 0; flex-shrink: 0; border-radius: 4px;"></div>
+                            <div class="release-info" style="width: 100%;">
+                                <div class="skeleton" style="height: 13px; width: 90%; margin-bottom: 4px; border-radius: 3px;"></div>
+                                <div class="skeleton" style="height: 11px; width: 60%; border-radius: 3px;"></div>
                             </div>
                         </div>
                         {% endfor %}
                     </div>
+                    <a href="#" class="show-more-link">Show More →</a>
                 </div>
+
+                <!-- Top Upcoming -->
+                <div class="sidebar-section">
+                    <h3 class="sidebar-section-title"><i class="fa-solid fa-bolt"></i> Top Upcoming</h3>
+                    <div class="release-list" id="top-upcoming-sidebar">
+                        {% for i in range(5) %}
+                        <div class="release-item">
+                            <div class="poster-wrapper skeleton" style="width: 45px; height: 60px; padding-top: 0; flex-shrink: 0; border-radius: 4px;"></div>
+                            <div class="release-info" style="width: 100%;">
+                                <div class="skeleton" style="height: 13px; width: 90%; margin-bottom: 4px; border-radius: 3px;"></div>
+                                <div class="skeleton" style="height: 11px; width: 60%; border-radius: 3px;"></div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <a href="#" class="show-more-link">Show More →</a>
+                </div>
+
             </div>
         </div>
     </div>

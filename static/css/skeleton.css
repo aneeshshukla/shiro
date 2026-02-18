@@ -47,7 +47,7 @@
 
 /* Hero Section Skeleton specific override if needed */
 .hero-skeleton {
-    padding-top: 56.25%; /* 16:9 for hero banners */
+    padding-top: 21%; /* ~19:4 for hero banners */
 }
 
 /* Image inside wrapper */

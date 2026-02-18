@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/schedule.css') }}">
+{% endblock %}
+
+{% block content %}
+    <!-- Recently Aired -->
+    <div class="schedule-page">
+        <div class="recently-aired-section">
+            <h3 class="recently-aired-title"><span class="dot-indicator"></span> RECENTLY AIRED</h3>
+            <div class="recently-aired-scroll" id="recently-aired">
+                {% for i in range(6) %}
+                <div class="recent-card">
+                    <div class="skeleton" style="width: 100%; height: 100%; border-radius: 8px;"></div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Day Selector -->
+        <div class="day-selector" id="day-selector">
+            <button class="day-btn" data-day="0">SUNDAY</button>
+            <button class="day-btn" data-day="1">MONDAY</button>
+            <button class="day-btn" data-day="2">TUESDAY</button>
+            <button class="day-btn" data-day="3">WEDNESDAY</button>
+            <button class="day-btn" data-day="4">THURSDAY</button>
+            <button class="day-btn" data-day="5">FRIDAY</button>
+            <button class="day-btn" data-day="6">SATURDAY</button>
+        </div>
+
+        <!-- Timeline -->
+        <div class="timeline" id="schedule-timeline">
+            <!-- Skeleton timeline items -->
+            {% for i in range(5) %}
+            <div class="timeline-group">
+                <div class="timeline-marker">
+                    <span class="timeline-dot"></span>
+                    <span class="timeline-chevron"><i class="fa-solid fa-chevron-right"></i></span>
+                    <div class="skeleton" style="height: 22px; width: 60px; border-radius: 4px;"></div>
+                </div>
+                <div class="timeline-cards">
+                    <div class="schedule-card">
+                        <div class="skeleton" style="width: 100%; height: 70px; border-radius: 8px;"></div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/schedule.js') }}"></script>
+{% endblock %}
