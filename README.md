@@ -1,12 +1,12 @@
-# Shiro - Anime Streaming Platform
+# AnimeTown - Anime Streaming Platform
 
-Shiro is a modern, responsive web application for streaming anime, built with Flask. It features a sleek dark-themed UI, real-time schedules, and a seamless watching experience.
+AnimeTown is a modern, responsive web application for streaming anime, built with Flask. It features a sleek dark-themed UI, real-time schedules, and a seamless watching experience.
 
-![Shiro Preview](static/preview.png)
+![AnimeTown Preview](static/preview.png)
 
 ## Features
 
-- **📺 Modern UI/UX**: Fully responsive "SHIRO" dark theme with glassmorphism effects and smooth animations.
+- **📺 Modern UI/UX**: Fully responsive "AnimeTown" dark theme with glassmorphism effects and smooth animations.
 - **� Discord OAuth**: Secure user authentication via Discord to save progress and access personalized features.
 - **👤 User Profiles**: Dedicated user profiles to manage settings and view watch history.
 - **�📅 Interactive Schedule**: Real-time weekly schedule widget with date navigation.

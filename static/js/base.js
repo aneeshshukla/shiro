@@ -3,7 +3,7 @@ const dropdown = document.getElementById("search-results");
 const mobileBtn = document.getElementById("mobile-menu-btn");
 const sidebarNav = document.getElementById("sidebar-nav");
 const sidebarOverlay = document.getElementById("sidebar-overlay");
-const topbar = document.getElementById("topbar");
+const topbar = document.getElementById("navbar");
 
 // HTML escape helper to prevent XSS
 function escapeHtml(str) {
@@ -79,6 +79,11 @@ input.addEventListener("input", async () => {
             `/api/suggestions?q=${encodeURIComponent(q)}`,
             { signal: controller.signal }
         );
+
+        if (!res.ok) {
+            dropdown.style.display = "none";
+            return;
+        }
 
         const data = await res.json();
         dropdown.innerHTML = "";

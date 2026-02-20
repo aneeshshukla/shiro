@@ -1,6 +1,9 @@
 import os
 import logging
 import requests
+import urllib.request
+import urllib.error
+import json
 from dotenv import load_dotenv
 from cachetools import TTLCache, cached
 from cachetools.keys import hashkey
@@ -33,7 +36,7 @@ class BaseClient:
     def __init__(self, base_url):
         self.base_url = base_url
 
-    def _get(self, endpoint, params=None):
+    def _get(self, endpoint, params=None, unsafe=False):
         """Internal get method with error handling."""
         if not self.base_url:
             logger.error("Base URL not configured for %s", self.__class__.__name__)
@@ -42,10 +45,21 @@ class BaseClient:
         try:
             url = f"{self.base_url}/{endpoint}"
             logger.info("[%s] Fetching: %s Params: %s", self.__class__.__name__, url, params)
-            response = requests.get(url, params=params, timeout=10)
-            response.raise_for_status()
-            return response.json()
-        except requests.exceptions.RequestException as e:
+            
+            if unsafe:
+                # Bypass automatic URL encoding using urllib
+                logger.info("Using unsafe URL mode (urllib) for: %s", url)
+                with urllib.request.urlopen(url, timeout=10) as response:
+                    status_code = response.getcode()
+                    if 200 <= status_code < 300:
+                        return json.loads(response.read().decode('utf-8'))
+                    else:
+                        raise requests.exceptions.HTTPError(f"HTTP {status_code}")
+            else:
+                response = requests.get(url, params=params, timeout=10)
+                response.raise_for_status()
+                return response.json()
+        except (requests.exceptions.RequestException, urllib.error.URLError) as e:
             logger.error("[%s] API Error: %s", self.__class__.__name__, e)
             return None
 
@@ -56,14 +70,14 @@ class AnimeDataClient(BaseClient):
     def __init__(self):
         super().__init__(os.getenv('BASE_URL'))
 
-    @cached(api_cache, key=lambda self, endpoint, params=None: make_cache_key(endpoint, params))
-    def fetch(self, endpoint, params=None):
+    @cached(api_cache, key=lambda self, endpoint, params=None, unsafe=False: make_cache_key(endpoint, params))
+    def fetch(self, endpoint, params=None, unsafe=False):
         """
         Fetches data from the anime API.
         Returns a list or dict depending on endpoint.
         Safely returns None on failure to let callers handle it.
         """
-        data = self._get(endpoint, params)
+        data = self._get(endpoint, params, unsafe=unsafe)
         if data is None:
             logger.warning("No data received for endpoint '%s'", endpoint)
             return None
@@ -165,20 +179,21 @@ class AnimeDataClient(BaseClient):
             data = self.fetch('recent-episodes', {'page': page, 'perPage': 20})
             return data if data else []
 
-        params = {'page': page, 'perPage': 20, 'type': 'ANIME'}
+        params = {'page': page, 'perPage': 20}
         params.update(category_map.get(category, {}))
         data = self.fetch('advanced-search', params)
         return data if data else []
 
     def get_by_genre(self, genre, page=1):
-        """Browse by genre using advanced search."""
-        data = self.fetch('advanced-search', {
-            'genres': f'["{genre}"]',
-            'page': page,
-            'perPage': 20,
-            'type': 'ANIME',
-            'sort': '["POPULARITY_DESC"]'
-        })
+        """Browse by genre using advanced search.
+        Manually constructing URL to prevents requests from encoding [ ] characters.
+        """
+        # Ensure genre is capitalized for AniList API
+        formatted_genre = genre.capitalize() if genre else genre
+        
+        query = f'genres=["{formatted_genre}"]&sort=["POPULARITY_DESC"]&perPage=20&page={page}'
+        endpoint = f'advanced-search?{query}'
+        data = self.fetch(endpoint, unsafe=True)
         return data if data else {}
 
     def get_random_anime(self):

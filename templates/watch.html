@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Watch {{ anime_title }} - {{ subtitle }}{% endblock %}
+{% block title %}Watch {{ anime_info.title if anime_info and anime_info.title else 'Anime' }} - Episode {{ current_episode }}{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/watch.css') }}">

@@ -15,12 +15,51 @@ window.scrollGenres = function(amount) {
     if (tabs) tabs.scrollBy({ left: amount, behavior: 'smooth' });
 };
 
+// HTML escape helper to prevent XSS
+function escapeHtml(str) {
+    if (!str) return "";
+    const div = document.createElement("div");
+    div.appendChild(document.createTextNode(String(str)));
+    return div.innerHTML;
+}
+
+async function fetchAniZipData(anilistId) {
+    try {
+        const response = await fetch(`https://api.ani.zip/mappings?anilist_id=${anilistId}`);
+        if (!response.ok) return { fanart: null, clearlogo: null };
+        const data = await response.json();
+        const images = data.images || [];
+        let fanart = null;
+        let clearlogo = null;
+        for (const img of images) {
+            if (img.coverType === 'Fanart') fanart = img.url;
+            if (img.coverType === 'Clearlogo') clearlogo = img.url;
+        }
+        return { fanart, clearlogo };
+    } catch (error) {
+        console.error('Error fetching ani.zip data for', anilistId, error);
+        return { fanart: null, clearlogo: null };
+    }
+}
+
 async function fetchHero() {
     try {
         const response = await fetch('/api/home/spotlight');
+        if (!response.ok) throw new Error(`Spotlight API returned ${response.status}`);
         const data = await response.json();
         const results = data.results || data;
         if (results && results.length > 0) {
+            // Fetch ani.zip data for each spotlight anime in parallel
+            const aniZipPromises = results.map(anime => {
+                const anilistId = anime.id || anime.anilistId;
+                return fetchAniZipData(anilistId);
+            });
+            const aniZipResults = await Promise.all(aniZipPromises);
+            // Attach fanart and clearlogo to each anime object
+            results.forEach((anime, i) => {
+                anime._fanart = aniZipResults[i].fanart;
+                anime._clearlogo = aniZipResults[i].clearlogo;
+            });
             renderHero(results);
             initSlider();
         }
@@ -32,6 +71,7 @@ async function fetchHero() {
 async function fetchRecentUpdates() {
     try {
         const response = await fetch('/api/home/recent-episodes');
+        if (!response.ok) throw new Error(`Recent episodes API returned ${response.status}`);
         const data = await response.json();
         const results = data.results || data;
         if (results) {
@@ -63,6 +103,7 @@ async function fetchTabbedGrid(tab) {
     
     try {
         const response = await fetch(tabEndpoints[tab]);
+        if (!response.ok) throw new Error(`${tab} API returned ${response.status}`);
         const data = await response.json();
         const results = data.results || data;
         if (results) {
@@ -87,6 +128,7 @@ function initFilterTabs() {
 async function fetchTrending() {
     try {
         const response = await fetch('/api/home/new-releases');
+        if (!response.ok) throw new Error(`Trending API returned ${response.status}`);
         const data = await response.json();
         const results = data.results || data;
         if (results) {
@@ -100,6 +142,7 @@ async function fetchTrending() {
 async function fetchUpcomingSidebar() {
     try {
         const response = await fetch('/api/home/upcoming');
+        if (!response.ok) throw new Error(`Upcoming API returned ${response.status}`);
         const data = await response.json();
         const results = data.results || data;
         if (results) {
@@ -118,36 +161,45 @@ function renderHero(animes) {
     
     animes.forEach((anime, index) => {
         const activeClass = index === 0 ? 'active' : '';
-        const banner = anime.cover || anime.image;
+        // Use Fanart from ani.zip as background, fallback to cover/image
+        const banner = anime._fanart || anime.cover || anime.image;
         const title = typeof anime.title === 'object'
             ? (anime.title.english || anime.title.userPreferred || anime.title.romaji || 'Unknown')
             : (anime.title || 'Unknown');
-        const type = anime.type || 'TV';
-        const releaseDate = anime.releaseDate || '';
-        const status = anime.status || 'RELEASING';
+        const safeTitle = escapeHtml(title);
+        const type = escapeHtml(anime.type || 'TV');
+        const releaseDate = escapeHtml(anime.releaseDate || '');
+        const status = escapeHtml(anime.status || 'RELEASING');
         const episodes = anime.totalEpisodes || anime.episodes || '';
         const duration = anime.duration ? `${anime.duration}m` : '';
         const rating = anime.rating ? (anime.rating / 10).toFixed(1) : '';
-        const season = anime.season || '';
+        const season = escapeHtml(anime.season || '');
         
         // Clean description (strip HTML tags)
         let desc = anime.description || '';
         desc = desc.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').replace(/\n/g, ' ');
         if (desc.length > 200) desc = desc.substring(0, 200) + '...';
+        desc = escapeHtml(desc);
         
         // Episode badge info
         const epNum = anime.currentEpisode || anime.episodeNumber || '';
+        const safeId = encodeURIComponent(anime.id);
+
+        // Build title markup: Clearlogo image + subtitle, or fallback to text
+        const titleMarkup = anime._clearlogo
+            ? `<img src="${anime._clearlogo}" alt="${safeTitle}" class="hero-clearlogo"><p class="hero-subtitle">${safeTitle}</p>`
+            : `<h1 class="hero-title">${safeTitle}</h1>`;
         
         html += `
         <div class="hero-slide ${activeClass}" data-index="${index}">
             <div class="poster-wrapper hero-skeleton skeleton">
-                <img src="${banner}" alt="${title}" class="hero-background" onload="this.parentElement.classList.add('loaded'); this.parentElement.classList.remove('skeleton')">
+                <img src="${banner}" alt="${safeTitle}" class="hero-background" onload="this.parentElement.classList.add('loaded'); this.parentElement.classList.remove('skeleton')">
             </div>
             <div class="hero-gradient"></div>
             ${epNum ? `
             <div class="hero-ep-badge">
                 <span class="ep-dot"></span>
-                EP ${epNum}
+                EP ${escapeHtml(String(epNum))}
             </div>
             ` : ''}
             <div class="hero-content">
@@ -160,12 +212,12 @@ function renderHero(animes) {
                         ${episodes ? `<span class="dot"></span><span>${episodes} Episodes</span>` : ''}
                         ${duration ? `<span class="dot"></span><span>${duration}</span>` : ''}
                     </div>
-                    <h1 class="hero-title">${title}</h1>
+                    ${titleMarkup}
                     <p class="hero-description">${desc}</p>
                 </div>
                 <div class="hero-buttons">
-                    <a href="/watch/${anime.id}" class="hero-btn hero-btn-primary"><i class="fa-solid fa-play"></i> Watch Now</a>
-                    <a href="/anime/${anime.id}" class="hero-btn hero-btn-secondary"><i class="fa-solid fa-circle-info"></i> Details</a>
+                    <a href="/watch/${safeId}" class="hero-btn hero-btn-primary"><i class="fa-solid fa-play"></i> Watch Now</a>
+                    <a href="/anime/${safeId}" class="hero-btn hero-btn-secondary"><i class="fa-solid fa-circle-info"></i> Details</a>
                 </div>
             </div>
         </div>`;
@@ -186,9 +238,9 @@ function renderHero(animes) {
 function getTitle(anime) {
     if (!anime.title) return 'Unknown';
     if (typeof anime.title === 'object') {
-        return anime.title.english || anime.title.userPreferred || anime.title.romaji || 'Unknown';
+        return escapeHtml(anime.title.english || anime.title.userPreferred || anime.title.romaji || 'Unknown');
     }
-    return anime.title;
+    return escapeHtml(anime.title);
 }
 
 function renderGrid(animes, containerId) {
@@ -197,13 +249,14 @@ function renderGrid(animes, containerId) {
     
     animes.forEach(anime => {
         const title = getTitle(anime);
-        const sub = anime.totalEpisodes || anime.sub || '?';
-        const dub = (anime.dub && anime.dub !== 0) ? `<span class="badge-sm badge-mic"><i class="fa-solid fa-microphone"></i> ${anime.dub}</span>` : '';
-        const type = anime.type || 'TV';
-        const year = anime.releaseDate || '';
+        const sub = escapeHtml(String(anime.totalEpisodes || anime.sub || '?'));
+        const dub = (anime.dub && anime.dub !== 0) ? `<span class="badge-sm badge-mic"><i class="fa-solid fa-microphone"></i> ${escapeHtml(String(anime.dub))}</span>` : '';
+        const type = escapeHtml(anime.type || 'TV');
+        const year = escapeHtml(anime.releaseDate || '');
+        const safeId = encodeURIComponent(anime.id);
         
         html += `
-        <a href="/anime/${anime.id}" class="anime-card-link">
+        <a href="/anime/${safeId}" class="anime-card-link">
             <div class="anime-card">
                 <div class="poster-wrapper skeleton">
                     <img src="${anime.image}" alt="${title}" loading="lazy" onload="this.parentElement.classList.add('loaded'); this.parentElement.classList.remove('skeleton')">
@@ -230,12 +283,13 @@ function renderVerticalList(animes, containerId) {
     
     animes.forEach(anime => {
         const title = getTitle(anime);
-        const type = anime.type || 'TV';
-        const year = anime.releaseDate || '';
+        const type = escapeHtml(anime.type || 'TV');
+        const year = escapeHtml(anime.releaseDate || '');
         const episodes = anime.totalEpisodes || anime.episodes || '';
+        const safeId = encodeURIComponent(anime.id);
         
         html += `
-        <a href="/anime/${anime.id}" class="v-item">
+        <a href="/anime/${safeId}" class="v-item">
             <div class="poster-wrapper skeleton" style="width: 50px; height: 70px; padding-top: 0; flex-shrink: 0;">
                 <img src="${anime.image}" alt="${title}" loading="lazy" onload="this.parentElement.classList.add('loaded'); this.parentElement.classList.remove('skeleton')">
             </div>
@@ -260,12 +314,13 @@ function renderSidebarList(animes, containerId) {
     
     animes.forEach(anime => {
         const title = getTitle(anime);
-        const type = anime.type || 'TV';
-        const year = anime.releaseDate || '';
+        const type = escapeHtml(anime.type || 'TV');
+        const year = escapeHtml(anime.releaseDate || '');
         const episodes = anime.totalEpisodes || anime.episodes || '';
+        const safeId = encodeURIComponent(anime.id);
         
         html += `
-        <a href="/anime/${anime.id}" class="release-item">
+        <a href="/anime/${safeId}" class="release-item">
             <div class="poster-wrapper skeleton" style="width: 45px; height: 60px; padding-top: 0; flex-shrink: 0; border-radius: 4px;">
                 <img src="${anime.image}" alt="${title}" loading="lazy" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;" onload="this.parentElement.classList.add('loaded'); this.parentElement.classList.remove('skeleton')">
             </div>

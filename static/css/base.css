@@ -384,18 +384,24 @@ body {
 
 /* === Logo (shared) === */
 .logo {
-    display: flex;
-    align-items: center;
-    font-size: 1.8rem;
-    font-weight: 800;
-    color: #fff;
-    text-decoration: none;
-    letter-spacing: -0.5px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: var(--text);
+  text-decoration: none;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.logo span.kai, .kai {
-    color: var(--accent-green);
-    margin-left: 2px;
+.logo img {
+  height: 32px;
+  width: auto;
+}
+
+.logo span {
+  color: var(--primary);
 }
 
 /* === Mobile === */
@@ -607,7 +613,10 @@ body {
     }
 
     .sidebar-logo {
-        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 2rem;
     }
 
     /* Hide legacy mobile topbar, show new topbar */

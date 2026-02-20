@@ -1,6 +1,13 @@
 // Store all schedule data, filter client-side by day
 let allScheduleItems = [];
 
+// HTML escape helper to prevent XSS
+function escapeHtml(str) {
+    if (!str) return "";
+    const div = document.createElement("div");
+    div.appendChild(document.createTextNode(String(str)));
+    return div.innerHTML;
+}
 document.addEventListener('DOMContentLoaded', () => {
     const today = new Date().getDay(); // JS: 0=Sun
     const dayBtns = document.querySelectorAll('.day-btn');
@@ -71,6 +78,7 @@ function filterAndRender(jsDayIndex) {
 async function fetchRecentlyAired() {
     try {
         const res = await fetch('/api/home/recent-episodes');
+        if (!res.ok) return;
         const data = await res.json();
         const results = data.results || data;
         if (results && results.length > 0) {
@@ -102,6 +110,7 @@ async function fetchSchedule(todayJsDay) {
     
     try {
         const res = await fetch('/api/home/schedule');
+        if (!res.ok) throw new Error(`Schedule API returned ${res.status}`);
         const data = await res.json();
         
         if (data && data.results) {
@@ -127,18 +136,19 @@ function renderRecentlyAired(animes) {
         const title = typeof anime.title === 'object'
             ? (anime.title.userPreferred || anime.title.romaji || anime.title.english || 'Unknown')
             : (anime.title || 'Unknown');
-        const ep = anime.episode || anime.episodes || anime.sub || '?';
+        const safeTitle = escapeHtml(title);
+        const ep = escapeHtml(anime.episode || anime.episodes || anime.sub || '?');
         const banner = anime.cover || anime.banner || anime.image;
         const poster = anime.image;
-        const id = anime.id || '#';
+        const id = encodeURIComponent(anime.id || '');
         
         html += `
         <a href="/anime/${id}" class="recent-card">
             <img src="${banner}" alt="" class="recent-card-bg" loading="lazy">
             <div class="recent-card-content">
-                <img src="${poster}" alt="${title}" class="recent-poster" loading="lazy">
+                <img src="${poster}" alt="${safeTitle}" class="recent-poster" loading="lazy">
                 <div class="recent-info">
-                    <div class="recent-title">${title}</div>
+                    <div class="recent-title">${safeTitle}</div>
                     <div class="recent-ep">EP ${ep}</div>
                 </div>
             </div>
@@ -187,10 +197,11 @@ function renderTimeline(items) {
             const title = typeof item.title === 'object'
                 ? (item.title.userPreferred || item.title.romaji || item.title.english || 'Unknown')
                 : (item.title || 'Unknown');
-            const ep = item.episode || '?';
+            const safeTitle = escapeHtml(title);
+            const ep = escapeHtml(item.episode || '?');
             const poster = item.image || '';
             const cover = item.cover || item.image || '';
-            const id = item.id || '#';
+            const id = encodeURIComponent(item.id || '');
             const time = item._time || hour;
             
             const aH = item._h ?? 0;

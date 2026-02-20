@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{{ anime.title.english or anime.title.romaji or 'Anime' }} - SHIRO{% endblock %}
+{% block title %}{{ anime.title.english or anime.title.romaji or 'Anime' }} - AnimeTown{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/info.css') }}?v=2">

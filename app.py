@@ -1,10 +1,13 @@
 from flask import Flask, render_template, request, session, jsonify, redirect, url_for, Response
 import os
 import logging
+import atexit
 import requests
 from dotenv import load_dotenv
 from services import AnimeDataClient, StreamClient
 import database
+
+load_dotenv()
 
 logger = logging.getLogger(__name__)
 
@@ -13,8 +16,6 @@ try:
 except Exception as e:
     logger.error("Failed to initialize database: %s", e)
     db = None
-
-load_dotenv()
 
 CLIENT_ID = os.getenv('CLIENT_ID')
 CLIENT_SECRET = os.getenv('CLIENT_SECRET')
@@ -29,11 +30,17 @@ if OS_ENV is None:
     os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY') or os.urandom(24).hex()
 
 # Initialize Clients
 anime_client = AnimeDataClient()
 stream_client = StreamClient()
+
+# Cleanup DB pool on shutdown
+def cleanup():
+    if db:
+        db.close()
+atexit.register(cleanup)
 
 # Home page
 
@@ -87,6 +94,11 @@ def api_home_spotlight():
 def api_home_recent():
     data = anime_client.get_recent_episodes()
     return jsonify(data if data else {})
+
+# @app.route('/api/genre/<genre>')
+# def api_home_genre(genre):
+#     data = anime_client.get_genre(genre)
+#     return jsonify(data if data else {})
 
 @app.route('/api/home/new-releases')
 def api_home_new_releases():

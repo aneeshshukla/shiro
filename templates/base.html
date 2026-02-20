@@ -3,15 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Watch anime online for free with Shiro" />
-    <meta name="keywords" content="anime, watch anime, free anime, Shiro" />
-    <meta name="author" content="Shiro" />
+    <meta name="description" content="Watch anime online for free with AnimeTown" />
+    <meta name="keywords" content="anime, watch anime, free anime, AnimeTown" />
+    <meta name="author" content="AnimeTown" />
     <link
       rel="shortcut icon"
       href="{{ url_for('static', filename='favicon.png') }}"
       type="image/x-icon"
     />
-    <title>{% block title %}ShiRo{% endblock %}</title>
+    <title>{% block title %}AnimeTown{% endblock %}</title>
     {% block head %}{% endblock %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/skeleton.css') }}?v=5">
     {% block extra_css %}{% endblock %}
@@ -135,7 +135,10 @@
       <button class="mobile-menu-btn" id="mobile-menu-btn">
         <i class="fa-solid fa-bars"></i>
       </button>
-      <a href="/" class="logo">SHI<span class="kai">RO</span></a>
+      <a href="/" class="logo">
+        <img src="{{ url_for('static', filename='favicon.png') }}" alt="AnimeTown Logo">
+        <span>AnimeTown</span>
+      </a>
       <div class="mobile-topbar-right">
         <a href="/search" class="mobile-search-btn"><i class="fa-solid fa-magnifying-glass"></i></a>
         {% if session.get('user') %}
@@ -161,7 +164,8 @@
       <header class="topbar" id="navbar">
         <div class="topbar-left">
           <a href="/" class="logo">
-            SHI<span class="kai">RO</span>
+            <img src="{{ url_for('static', filename='favicon.png') }}" alt="AnimeTown Logo">
+            <span>AnimeTown</span>
           </a>
         </div>
 
@@ -199,16 +203,17 @@
       <footer id="footer">
         <div class="footer-bottom">
           <div class="footer-left">
-            <a href="/" class="logo" style="font-size: 2rem; margin-bottom: 10px; display: block">
-              SHI<span class="kai">RO</span>
+            <a href="/" class="logo" style="font-size: 2rem; margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
+              <img src="{{ url_for('static', filename='favicon.png') }}" alt="AnimeTown Logo" style="height: 40px;">
+              <span>AnimeTown</span>
             </a>
             <p class="disclaimer">
-              JustAnime does not store any files on our server, we only link to media hosted on 3rd-party services.
+              AnimeTown does not store any files on our server, we only link to media hosted on 3rd-party services.
             </p>
-            <p style="color: #555; font-size: 0.8rem;">&copy; 2026 JustAnime. All rights reserved.</p>
+            <p style="color: #555; font-size: 0.8rem;">&copy; 2026 AnimeTown. All rights reserved.</p>
           </div>
           <div class="footer-center">
-            <a href="/terms">Terms of Service</a>
+            <a href="/terms-of-service">Terms of Service</a>
             <a href="#">DMCA</a>
             <a href="#">Donate <i class="fa-solid fa-heart" style="color: var(--primary);"></i></a>
           </div>
@@ -235,7 +240,7 @@
     <div id="cookie-banner" class="cookie-banner">
       <div class="cookie-content">
         We use cookies and local storage to save your preferences and watch history. 
-        By continuing, you agree to our <a href="/privacy">Privacy Policy</a>.
+        By continuing, you agree to our <a href="/privacy-policy">Privacy Policy</a>.
       </div>
       <button id="accept-cookies" class="cookie-btn">Got it!</button>
     </div>
