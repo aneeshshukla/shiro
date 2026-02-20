@@ -207,16 +207,54 @@ class AnimeDataClient(BaseClient):
 
 
 class StreamClient(BaseClient):
-    """Client for streaming links and DB interactions."""
+    """Client for streaming links via the JS API."""
 
     def __init__(self):
-        super().__init__(os.getenv('STREAM_URL'))
+        # Point to the local JS API or a configurable URL from env
+        self.js_api_url = os.getenv('JS_API_URL', 'http://localhost:3000')
+        super().__init__(self.js_api_url)
 
-    @cached(api_cache, key=lambda self, episode_id, category='sub', ep_num='1': make_cache_key(
-        f"stream_{episode_id}", {'category': category, 'ep': ep_num}
+    @cached(api_cache, key=lambda self, anime_id, category='sub', ep_num='1', server='hd-1': make_cache_key(
+        f"stream_js_{anime_id}", {'type': category, 'ep': ep_num, 'server': server}
     ))
-    def get_stream_data(self, episode_id, category='sub', ep_num='1'):
-        """Fetches streaming data."""
-        params = {'ep': ep_num, 'category': category}
-        data = self._get(episode_id, params)
-        return data
+    def get_stream_data(self, anime_id, category='sub', ep_num='1', server='hd-1'):
+        """Fetches streaming data from the JS API."""
+        params = {'ep': ep_num, 'type': category, 'server': server}
+        response = self._get(f"api/stream/{anime_id}", params)
+        
+        if response and response.get('success'):
+            return {
+                "ok": True,
+                "count": 1,
+                "streams": {
+                    "sources": [{"url": response['streamLink']}]
+                },
+                "stream_servers": response.get('streamServers') # New dynamic server data
+            }
+        return {"ok": False, "count": 0, "streams": {"sources": []}, "stream_servers": None}
+
+
+class EmbedClient(BaseClient):
+    """Client for fetching episode embeds from a secondary stream source."""
+
+    def __init__(self):
+        super().__init__(os.getenv('STREAM_URL_V2'))
+
+    @cached(api_cache, key=lambda self, episode_id, ep_num='1': make_cache_key(
+        f"embed_{episode_id}", {'ep': ep_num}
+    ))
+    def get_hianime_episode_id(self, anime_id, ep_num='1'):
+        hianime_episode_data = requests.get(f"https://hianime-mapper-pi-ashy.vercel.app/anime/info/{anime_id}").json()
+        for each in hianime_episode_data['data']['episodesList']:
+            if each['number'] == int(ep_num):
+                return each['id'].replace("?", "::")
+
+        return None
+    def get_stream_links(self, anime_id, ep_num='1', server_id='hd-1', type='sub'):
+        hianime_episode_id = self.get_hianime_episode_id(anime_id, ep_num)
+        if hianime_episode_id:
+            return f"https://hianime-api-rho-beige.vercel.app/api/v1/embed/{server_id}/{hianime_episode_id}/{type}"
+        return None
+        
+if __name__ == "__main__":
+    print(EmbedClient().get_stream_links(171627))

@@ -1,19 +1,24 @@
 {% extends "base.html" %}
 
-{% block title %}Watch {{ anime_info.title if anime_info and anime_info.title else 'Anime' }} - Episode {{ current_episode }}{% endblock %}
+{% block title %}Watch {{ anime_info.title.english if anime_info and anime_info.title.english else 'Anime' }} - Episode {{ current_episode }}{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/watch.css') }}">
 {% endblock %}
 
 {% block content %}
-<div class="watch-container">
+<div class="watch-container" id="watch-data"
+     data-anime-id="{{ episode_id }}"
+     data-episode="{{ current_episode }}"
+     data-server="{{ current_server }}"
+     data-type="{{ 'dub' if is_dub else 'sub' }}"
+     data-stream-servers='{{ stream_servers|tojson|safe }}'>
     <!-- Breadcrumb -->
     <div class="breadcrumb-container">
         <ul class="breadcrumb">
             <li><a href="/"><i class="fa-solid fa-house"></i> Home</a></li>
             <li><i class="fa-solid fa-chevron-right separator"></i></li>
-            <li><a href="/anime/{{ anime_info.id }}"><i class="fa-solid fa-circle-info"></i> {{ anime_info.title or anime_title }}</a></li>
+            <li><a href="/anime/{{ anime_info.id }}"><i class="fa-solid fa-circle-info"></i> {{ anime_info.title.english or anime_title }}</a></li>
             <li><i class="fa-solid fa-chevron-right separator"></i></li>
             <li class="active">Episode {{ current_episode }}</li>
         </ul>
@@ -50,17 +55,27 @@
             <!-- Pre-Player Toolbar -->
             <div class="player-toolbar">
                 <div class="server-list">
-                    <span class="toolbar-label"><i class="fa-solid fa-server"></i> Servers:</span>
-                    {% if servers %}
-                        {% for server in servers %}
-                        <button class="server-btn {% if loop.index == 1 %}active{% endif %}" 
-                                onclick="changeServer('{{ server.url }}', this)">
-                            {{ server.name }}
-                        </button>
-                        {% endfor %}
-                    {% else %}
-                        <span style="color: #666; font-size: 0.9rem;">Default</span>
-                    {% endif %}
+                    <span class="toolbar-label"><i class="fa-solid fa-server"></i> Server:</span>
+                    <div class="custom-select" id="server-dropdown">
+                        <div class="select-trigger">
+                            <span id="current-server-name">Loading...</span>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </div>
+                        <div class="select-options" id="server-options">
+                            <!-- Options populated by watch.js -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="category-toggle" style="margin-left: 15px;">
+                    <div class="toolbar-btn {% if not is_dub %}active{% endif %}" 
+                         data-type="sub"
+                         onclick="changeSetting({ type: 'sub' })"
+                         title="Subtitled">SUB</div>
+                    <div class="toolbar-btn {% if is_dub %}active{% endif %}" 
+                         data-type="dub"
+                         onclick="changeSetting({ type: 'dub' })"
+                         title="Dubbed">DUB</div>
                 </div>
                 
                 <div class="control-list">
@@ -79,7 +94,7 @@
             </div>
 
             <div class="watch-info">
-                <h1>{{ anime_info.title or anime_title }}</h1>
+                <h1>{{ anime_info.title.english or anime_title }}</h1>
                 <p>Episode {{ current_episode }}</p>
                 <p class="description">{{ anime_info.description }}</p>
             </div>
@@ -99,23 +114,18 @@
             <div class="episodes-scroller">
                 {% if anime_info.episodes %}
                     {% for episode in anime_info.episodes %}
-                    <!-- Handle complex IDs with $ separator if needed -->
-                    {% set id_parts = episode.id.split('$') %}
-                    {% set safe_id = id_parts[0] %}
-                    {% set query = id_parts[1] if id_parts|length > 1 else '' %}
-                    
-                    <a href="/watch/{{ safe_id }}?{{ query }}" 
-                       class="ep-item {% if episode.number|string == current_episode|string %}active{% endif %}"
-                       data-number="{{ episode.number }}">
+                    <div class="ep-item {% if episode.number|string == current_episode|string %}active{% endif %}"
+                         style="cursor: pointer;"
+                         data-number="{{ episode.number }}"
+                         onclick="changeSetting({ episode: '{{ episode.number }}' })">
                         <div class="ep-num">{{ episode.number }}</div>
                         <div class="ep-details">
                             <div class="ep-title">{{ episode.title or 'Episode ' ~ episode.number }}</div>
-                            <!-- <div class="ep-len">24m</div> -->
                         </div>
                         {% if episode.number|string == current_episode|string %}
                         <div class="now-playing-icon"><i class="fa-solid fa-play"></i></div>
                         {% endif %}
-                    </a>
+                    </div>
                     {% endfor %}
                 {% else %}
                      <div class="ep-item">No episodes found.</div>
@@ -127,40 +137,11 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="{{ url_for('static', filename='js/watch.js') }}"></script>
 <script>
-    /**
-     * Changes the iframe source and manages active button state
-     */
-    function changeServer(url, btnElement) {
-        const iframe = document.getElementById('player-iframe');
-        if (iframe && url) {
-            iframe.src = url;
-            
-            // Manage button active states
-            document.querySelectorAll('.server-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            btnElement.classList.add('active');
-        }
-    }
-    
-    // Toggle logic for control bar buttons
-    document.querySelectorAll('.control-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            this.classList.toggle('active');
-        });
+    // Initialize Watch Page
+    document.addEventListener('DOMContentLoaded', () => {
+        initWatchPage();
     });
-
-    // Simple episode search filter
-    const searchInput = document.querySelector('.search-input');
-    if (searchInput) {
-        searchInput.addEventListener('input', function(e) {
-            const term = e.target.value.toLowerCase();
-            document.querySelectorAll('.ep-item').forEach(item => {
-                const text = item.textContent.toLowerCase();
-                item.style.display = text.includes(term) ? 'flex' : 'none';
-            });
-        });
-    }
 </script>
 {% endblock %}

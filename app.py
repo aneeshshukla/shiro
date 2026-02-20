@@ -181,30 +181,30 @@ def anime_info(anime_id):
     return render_template('anime_info.html', current_page='', anime=info, most_popular=most_popular)
 
 # Watch episode
-@app.route('/watch/<episode_id>')
-def watch(episode_id):
+@app.route('/watch/<anime_id>')
+def watch(anime_id):
     ep = request.args.get('ep', '1')
-    dub = request.args.get('dub', 'false').lower() == 'true'
-    category = "dub" if dub else "sub"
+    server = 'hd-1'
+    category = 'sub'
     try:
         # Call Stream Client
-        api_response = stream_client.get_stream_data(episode_id, category, ep)
+        api_response = stream_client.get_stream_data(anime_id, category, ep, server)
 
         if not api_response or not api_response.get("ok") or api_response.get("count") == 0:
              # If stream fails, we might still want to show the page but with an error message
-             # But original logic returned 503.
-            return render_template('error.html', message="Streaming service unavailable", alt_link="https://anikai.to/watch/" + episode_id + "#ep=" + ep), 503
+            return render_template('error.html', message="Streaming service unavailable", alt_link="https://anikai.to/watch/" + anime_id + "#ep=" + ep), 503
 
         # We need anime info for the breadcrumbs/details on the watch page
-        anime_details = anime_client.get_info(episode_id)
+        anime_details = anime_client.get_info(anime_id)
         
         return render_template(
             'watch.html',
             **api_response, 
             current_episode=ep,
-            is_dub=dub,
-            episode_id=episode_id,
-            anime_info=anime_details if anime_details else {},
+            current_server=server,
+            is_dub=False,
+            episode_id=anime_id,
+            anime_info=anime_details if anime_details else {}
         )
 
     except Exception as e:
@@ -263,12 +263,14 @@ def api_anime_info(anime_id):
 
 # API endpoint for streaming links
 
-@app.route('/api/watch/<episode_id>')
-def api_watch(episode_id):
+@app.route('/api/watch/<animeid>')
+def api_watch(animeid):
+    ep = request.args.get('ep', '1')
+    server = request.args.get('server', 'hd-1')
     dub = request.args.get('dub', 'false').lower() == 'true'
     category = "dub" if dub else "sub"
-    streams = stream_client.get_stream_data(episode_id, category, request.args.get('ep', '1'))
-    return jsonify(streams if streams else {})
+    streams_data = stream_client.get_stream_data(animeid, category, ep, server)
+    return jsonify(streams_data if streams_data else {})
 
 @app.route('/profile')
 def profile():

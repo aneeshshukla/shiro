@@ -174,6 +174,7 @@
 }
 
 .server-btn {
+    display: inline-block;
     background: rgba(255,255,255,0.06);
     color: #999;
     border: 1px solid rgba(255,255,255,0.06);
@@ -184,6 +185,7 @@
     cursor: pointer;
     transition: all 0.2s;
     text-transform: uppercase;
+    text-decoration: none;
 }
 
 .server-btn:hover {
@@ -196,6 +198,34 @@
     color: #fff;
     border-color: var(--primary);
     box-shadow: 0 2px 10px rgba(229,9,20,0.3);
+}
+
+.category-toggle {
+    display: flex;
+    background: rgba(0,0,0,0.2);
+    padding: 3px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+.toolbar-btn {
+    padding: 5px 14px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #666;
+    text-decoration: none;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+.toolbar-btn:hover { color: #aaa; }
+
+.toolbar-btn.active {
+    background: rgba(255,255,255,0.08);
+    color: var(--primary);
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
 }
 
 .control-list {
@@ -300,6 +330,95 @@
     color: #fff;
     text-transform: uppercase;
     letter-spacing: 1px;
+    font-weight: 700;
+}
+
+.custom-select {
+    position: relative;
+    width: 160px;
+    z-index: 100;
+}
+
+.select-trigger {
+    background: rgba(255,255,255,0.06);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.select-trigger:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.2);
+}
+
+.custom-select.active .select-trigger {
+    border-color: var(--accent-color, #7289da);
+    box-shadow: 0 0 15px rgba(114, 137, 218, 0.2);
+}
+
+.select-trigger i {
+    font-size: 0.7rem;
+    color: #888;
+    transition: transform 0.3s;
+}
+
+.custom-select.active .select-trigger i {
+    transform: rotate(180deg);
+}
+
+.select-options {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    background: rgba(15, 15, 15, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.custom-select.active .select-options {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.select-option {
+    padding: 10px 14px;
+    font-size: 0.8rem;
+    color: #ccc;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+
+.select-option:last-child {
+    border-bottom: none;
+}
+
+.select-option:hover {
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+    padding-left: 18px;
+}
+
+.select-option.active {
+    background: rgba(114, 137, 218, 0.15);
+    color: var(--accent-color, #7289da);
     font-weight: 700;
 }
 

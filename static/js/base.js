@@ -99,7 +99,7 @@ input.addEventListener("input", async () => {
             const div = document.createElement("div");
             div.className = "search-item";
 
-            const safeTitle = escapeHtml(anime.title);
+            const safeTitle = escapeHtml(anime.title.english);
             const safeImage = escapeHtml(anime.image);
             const safeId = escapeHtml(anime.id);
 
