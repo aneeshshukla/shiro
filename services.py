@@ -211,7 +211,7 @@ class StreamClient(BaseClient):
 
     def __init__(self):
         # Point to the local JS API or a configurable URL from env
-        self.js_api_url = os.getenv('JS_API_URL', 'http://localhost:3000')
+        self.js_api_url = os.getenv('STREAM_URL')
         super().__init__(self.js_api_url)
 
     @cached(api_cache, key=lambda self, anime_id, category='sub', ep_num='1', server='hd-1': make_cache_key(
